@@ -166,13 +166,13 @@ export const cursors = [
   {
     name: 'wait', label: 'Busy (M3E indicator)', group: 'Status',
     roles: ['Wait'].map(ID), hotspot: [16, 16],
-    frames: 24, frameMs: 4666 / 24,
+    frames: 280, frameMs: 4666 / 280,
     loading: { container: 24, center: [16, 16] },
   },
   {
     name: 'progress', label: 'Busy in background', group: 'Status',
     roles: ['cursor.4'].map(ID), hotspot: ARROW_HOT,
-    frames: 24, frameMs: 4666 / 24,
+    frames: 280, frameMs: 4666 / 280,
     loading: { container: 13, center: [BX - 0.5, BY - 0.5], under: () => arrowWith('') },
   },
   // Everyday
