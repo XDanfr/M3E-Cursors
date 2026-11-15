@@ -6,10 +6,23 @@ and other desktops that use Xcursor themes).
 
 ![Gallery](previews/cursor-gallery.png)
 
-Every cursor shares one shape vocabulary:
+Every cursor shares one shape vocabulary: **expressive shapes, honest silhouettes**. Anything
+that points or clicks keeps a shape you recognise at a glance. The rest (badges, centres, the
+zoom lens and motion) uses Material 3 Expressive's shape language.
 
-- **Shapes:** soft rounded corners, pills, and a squircle FAB badge.
-- **Colours:** one M3 tonal palette per variant.
+- **Shapes:** soft rounded corners and pills for the cursors themselves. Badges and centres use
+  the official [Material Shape library](https://github.com/matraic/m3e/tree/main/packages/web/src/shape),
+  one shape per meaning:
+  - help: 7-sided cookie
+  - context menu: bun
+  - alias: arch
+  - copy: sunny
+  - location: gem
+  - person: flower
+  - move, cell and crosshair centres: 4-sided cookie
+  - zoom lens: 12-sided cookie
+- **Colours:** one M3 tonal palette per variant. Badges and centres use the palette's tertiary
+  accent (the primary hue + 60°, as in M3's tonal-spot scheme), M3E's colour for emphasis.
 - **Edges:** a white rim and a thin dark hairline, so each cursor stays visible on light, dark and
   busy backgrounds.
 
@@ -19,7 +32,7 @@ The busy cursor is the official M3E **contained loading indicator**, rendered fr
 | | |
 |---|---|
 | ![Loading](previews/animation-preview/wait-light.gif) | ![Upload](previews/animation-preview/upload-light.gif) |
-| Wait: official contained loading indicator, 4.666 s loop at 60 fps (GIF shown at 20 fps) | Copy / upload drop: FAB plus springs into an upload arrow |
+| Wait: official contained loading indicator, 4.666 s loop at 60 fps (GIF shown at 20 fps) | Copy / upload drop: the sunny badge morphs into a soft burst as the plus folds into an upload arrow |
 
 ## Download
 
@@ -37,18 +50,18 @@ Get the build for your platform from the
 ![Variants](previews/variants.png)
 
 <!-- colours:start -->
-| Variant | Body | Badge | Glyph |
-|---|---|---|---|
-| Purple | `#6750A4` | `#EADDFF` | `#21005D` |
-| Blue | `#0856CF` | `#DAE2FF` | `#001847` |
-| Teal | `#006A6A` | `#A0F0F0` | `#002020` |
-| Green | `#386A20` | `#B8F398` | `#072100` |
-| Orange | `#8B5000` | `#FFDCBE` | `#2D1600` |
-| Red | `#B4271F` | `#FFDAD5` | `#410001` |
-| Pink | `#984061` | `#FFD9E2` | `#3E001D` |
-| Graphite | `#605D64` | `#E6E0E9` | `#1D1B20` |
-| Light Blue | `#96CCFF` | `#004A75` | `#CEE5FF` |
-| Pale Blue | `#CEE5FF` | `#00639A` | `#E8F2FF` |
+| Variant | Body | Container | Accent badge | Accent glyph |
+|---|---|---|---|---|
+| Purple | `#6750A4` | `#EADDFF` | `#FFD8E4` | `#31111D` |
+| Blue | `#0856CF` | `#DAE2FF` | `#FED7F9` | `#2B122B` |
+| Teal | `#006A6A` | `#A0F0F0` | `#D3E4FF` | `#041C35` |
+| Green | `#386A20` | `#B8F398` | `#BBEBEC` | `#002020` |
+| Orange | `#8B5000` | `#FFDCBE` | `#DCE8B4` | `#161E00` |
+| Red | `#B4271F` | `#FFDAD5` | `#FCDFA6` | `#261A00` |
+| Pink | `#984061` | `#FFD9E2` | `#FFDCC2` | `#2E1500` |
+| Graphite | `#605D64` | `#E6E0E9` | `#F9DBE2` | `#27171C` |
+| Light Blue | `#96CCFF` | `#004A75` | `#4F4061` | `#EEDBFF` |
+| Pale Blue | `#CEE5FF` | `#00639A` | `#68587A` | `#F9EDFF` |
 <!-- colours:end -->
 
 Each variant takes tones 40, 30, 90 and 10 from the M3 tonal palette of its seed colour, using
@@ -56,7 +69,7 @@ Google's [material-color-utilities](https://github.com/material-foundation/mater
 Purple keeps the M3 baseline values. Graphite is the purple hue at very low chroma.
 
 **Light Blue** and **Pale Blue** are light cursors. They use M3's dark-scheme roles instead: a
-light body (tone 80 or 90), a dark FAB badge (tone 30 or 40) with a light glyph, and a reversed
+light body (tone 80 or 90), dark badges (tone 30 or 40) with light glyphs, and a reversed
 edge, with a dark rim inside and a white hairline outside, so they stay visible on white. The
 loading indicator flips with them: a dark container with a light morphing shape, the component's
 own dark-theme look.
@@ -302,6 +315,7 @@ npm run build      # render → macOS, Windows, Linux → validate → previews,
 
 ## Credits and licence
 
-- The loading indicator is the `m3e-loading-indicator` component from
+- The loading indicator is the `m3e-loading-indicator` component, and the badge and centre
+  shapes come from the `m3e-shape` component's Material Shape library. Both are from
   [matraic/m3e](https://github.com/matraic/m3e), MIT licence.
 - Cursor artwork, tooling and documentation: MIT, see `LICENSE`.
