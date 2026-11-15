@@ -1,14 +1,14 @@
-# M3E Cursor — Purple
+# M3E Cursors for MaCursor
 
 A Material 3 Expressive cursor theme for macOS Tahoe 26, packaged for
-[MaCursor](https://github.com/writronic/MaCursor).
+[MaCursor](https://github.com/writronic/MaCursor), in eight colours.
 
 ![Gallery](previews/cursor-gallery.png)
 
 Every cursor shares one shape vocabulary:
 
 - **Shapes:** soft rounded corners, pills, and a squircle FAB badge.
-- **Colours:** one purple tonal palette.
+- **Colours:** one M3 tonal palette per variant.
 - **Edges:** a white rim and a thin dark hairline, so each cursor stays visible on light, dark and
   busy backgrounds.
 
@@ -20,21 +20,42 @@ The busy cursor is the official M3E **contained loading indicator**, rendered fr
 | ![Loading](previews/animation-preview/wait-light.gif) | ![Upload](previews/animation-preview/upload-light.gif) |
 | Wait: official contained loading indicator, 4.666 s loop at 60 fps (GIF shown at 20 fps) | Copy / upload drop: FAB plus springs into an upload arrow |
 
+## Colour variants
+
+![Variants](previews/variants.png)
+
+| Variant | Theme file | Body (T40) | Badge (T90) | Glyph / edge (T10) |
+|---|---|---|---|---|
+| Purple | `dist/M3E-Purple.cursor` | `#6750A4` | `#EADDFF` | `#21005D` |
+| Blue | `dist/M3E-Blue.cursor` | `#0856CF` | `#DAE2FF` | `#001847` |
+| Teal | `dist/M3E-Teal.cursor` | `#006A6A` | `#A0F0F0` | `#002020` |
+| Green | `dist/M3E-Green.cursor` | `#386A20` | `#B8F398` | `#072100` |
+| Orange | `dist/M3E-Orange.cursor` | `#8B5000` | `#FFDCBE` | `#2D1600` |
+| Red | `dist/M3E-Red.cursor` | `#B4271F` | `#FFDAD5` | `#410001` |
+| Pink | `dist/M3E-Pink.cursor` | `#984061` | `#FFD9E2` | `#3E001D` |
+| Graphite | `dist/M3E-Graphite.cursor` | `#605D64` | `#E6E0E9` | `#1D1B20` |
+
+Each variant takes tones 40, 30, 90 and 10 from the M3 tonal palette of its seed colour, using
+Google's [material-color-utilities](https://github.com/material-foundation/material-color-utilities).
+Purple keeps the M3 baseline values. Graphite is the purple hue at very low chroma.
+
 ## Install
 
 1. Install MaCursor (macOS 13 or later; tested here on macOS 26.7.1 with MaCursor 2.7.5).
-2. Double-click `dist/M3E-Purple.cursor`, or drag it onto MaCursor's library window, or use
-   **File → Import Theme…**. If MaCursor is running only in the menu bar, open its library
-   window first. A double-clicked theme can be dropped silently when no window is open.
-3. Select **M3E Cursor Purple** and click **Apply**.
+2. Double-click a theme in `dist/`, for example `dist/M3E-Purple.cursor`. You can also drag it onto
+   MaCursor's library window, or use **File → Import Theme…**. If MaCursor is running only in the
+   menu bar, open its library window first. A double-clicked theme can be dropped silently when
+   no window is open.
+3. Select the theme, for example **M3E Cursor Purple**, and click **Apply**.
 
-There's also `dist/M3E-Purple-ReducedMotion.cursor`. It's the same theme, but every animated
-cursor holds its first frame. Cursors can't read the system's *Reduce motion* setting, so reduced
-motion has to be a separate theme. To switch automatically, use MaCursor's per-app or scheduled
-themes.
+Every variant also comes as `M3E-<Colour>-ReducedMotion.cursor`. It's the same theme, but every
+animated cursor holds its first frame. Cursors can't read the system's *Reduce motion* setting, so
+reduced motion has to be a separate theme. To switch automatically, use MaCursor's per-app or
+scheduled themes.
 
-To change the size, use MaCursor → Settings → Cursor Control → **Cursor Scale**. Every slot ships at 32, 64 and 160 px, and static cursors also at 320 px. They stay
-sharp up to 5× on Retina, and static cursors up to 10×.
+To change the size, use MaCursor → Settings → Cursor Control → **Cursor Scale**. Every slot ships
+at 32, 64 and 160 px, and static cursors also at 320 px. They stay sharp up to 5× on Retina, and
+static cursors up to 10×.
 
 ## Supported roles
 
@@ -106,11 +127,12 @@ IBeam into them. This theme also writes them explicitly, so they match even if y
 ## Project layout
 
 ```text
-design/      tokens.json, geometry.mjs (shape helpers), cursors.mjs (every cursor), animation-spec.md
-cursors/     editable SVG export of each cursor (frame SVGs for the upload animation)
+design/      tokens.json, variants.json (colour variants), geometry.mjs (shape helpers),
+             cursors.mjs (every cursor), animation-spec.md
+cursors/     editable SVG export of each cursor in purple (frame SVGs for the upload animation)
 tools/       render.mjs, package.mjs, validate.mjs, previews.mjs, sheet.mjs
-previews/    gallery (SVG + PNG, light and dark) and animation GIFs
-dist/        M3E-Purple.cursor, M3E-Purple-ReducedMotion.cursor
+previews/    gallery (SVG + PNG, light and dark), variants overview and animation GIFs
+dist/        M3E-<Colour>.cursor and M3E-<Colour>-ReducedMotion.cursor for each variant
 build/       generated frames (not part of the distribution)
 ```
 
@@ -125,14 +147,16 @@ used by the validator, to read the plist.
 
 ```bash
 npm install
-npm run build      # render → package → validate → previews
+npm run build      # render → package → validate → previews, for every variant
 ```
 
 | Script | What it does |
 |---|---|
-| `npm run render` | Exports the SVGs and renders every cursor at 32/64/160/320 px (long animations stop at 160 px). Vector cursors are drawn at each device scale, so nothing is a bitmap upscale. Loading cursors are frames of the live `<m3e-loading-indicator>`, paused and seeked with the Web Animations API. |
-| `npm run package` | Writes the two `.cursor` themes in MaCursor's native plist format, the same format as MaCursor's own `CursorThemeWriter.swift`. |
+| `npm run render` | Exports the SVGs and renders every cursor in every variant at 32/64/160/320 px (long animations stop at 160 px). Vector cursors are drawn at each device scale, so nothing is a bitmap upscale. Loading cursors are frames of the live `<m3e-loading-indicator>`, paused and seeked with the Web Animations API. |
+| `npm run package` | Writes a `.cursor` theme and a reduced-motion theme per variant, in MaCursor's native plist format, the same format as MaCursor's own `CursorThemeWriter.swift`. |
 | `npm run validate` | Checks frame counts and sizes, alpha and clipping, hotspot placement, role coverage, and the plist rules MaCursor applies to its own themes. |
+| `npm run palettes` | Regenerates `design/variants.json` from the seed colours in `tools/palettes.mjs`. To add a variant, add a seed there. |
+| `M3E_VARIANT=blue npm run render` | Renders a single variant. `package` takes variant ids as arguments: `node tools/package.mjs blue`. |
 | `npm run previews` | Writes the gallery and animation GIFs. |
 | `node tools/sheet.mjs out.png [frame] [names…]` | Inspection sheet at true 1× and 2× pixels over four backgrounds, with hotspots marked. |
 
