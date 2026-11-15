@@ -23,12 +23,25 @@ const G = 1.8; // glyph stroke weight
 
 const arrowWith = (badge) => svg(layer([arrowPart]) + badge);
 
+// ---------- I-beam ---------------------------------------------------------------------
+// Straight stem with soft, slightly cupped serifs.
+const ibeamParts = [
+  { d: line([16, 8.6], [16, 23.4]), w: 2.2 },
+  { d: `M12.4,6.4Q16,9.4 19.6,6.4`, w: 2.2 },
+  { d: `M12.4,25.6Q16,22.6 19.6,25.6`, w: 2.2 },
+];
+
 // ---------- Definitions ----------------------------------------------------------------
 export const cursors = [
   {
     name: 'arrow', label: 'Default arrow', group: 'Everyday',
     roles: ['Arrow', 'ArrowS'].map(ID), hotspot: ARROW_HOT,
     svg: () => arrowWith(''),
+  },
+  {
+    name: 'text', label: 'Text I-beam', group: 'Everyday',
+    roles: ['IBeam', 'IBeamS', 'IBeamXOR'].map(ID), hotspot: [16, 16],
+    svg: () => svg(layer(ibeamParts)),
   },
 ];
 
