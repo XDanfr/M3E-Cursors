@@ -96,6 +96,23 @@ and pick `M3E-Purple.tar.gz` (or the combined archive). Then select **M3E Purple
   `gsettings set org.gnome.desktop.interface cursor-theme 'M3E-Purple'`.
 - **Other desktops:** in your desktop's cursor settings, or set `XCURSOR_THEME=M3E-Purple`.
 
+**Hyprland:** the same folder is also a [Hyprcursor](https://github.com/hyprwm/hyprcursor) theme,
+with a `manifest.hl` and `hyprcursors/*.hlc` next to the Xcursor files. Static cursors and the upload
+animation are SVG, so they stay sharp at any size. After extracting, set it in `hyprland.conf`:
+
+```ini
+env = HYPRCURSOR_THEME,M3E-Purple
+env = HYPRCURSOR_SIZE,24
+env = XCURSOR_THEME,M3E-Purple
+env = XCURSOR_SIZE,24
+```
+
+Keep the `XCURSOR_*` lines: XWayland apps and some toolkits still read the Xcursor theme.
+
+> [!NOTE]
+> The Hyprcursor theme is untested. It's built from Hyprcursor's documented format and checked
+> against the rules in its loader, but nobody has run it on Hyprland yet.
+
 Each theme ships the nominal sizes 24, 32, 48, 64 and 96. The 280-frame loading animation is
 stored at 30 fps on Linux (140 frames, the same 4.666 s cycle) to keep the files a sensible size.
 
@@ -186,10 +203,10 @@ back to Breeze, then Adwaita. The full list is in [`design/platforms.mjs`](desig
   280 frames per 4.666 s cycle, the same layout as the MD3E Cursors gallery theme. On macOS,
   MaCursor's preview plays all of them, but according to MaCursor's source its engine samples 24
   frames when it applies a theme (a CoreGraphics cursor limit), so system-wide playback may be
-  coarser. Windows plays all 280 frames (1 jiffy each). Linux plays 140 frames at 30 fps. The
+  coarser. Windows plays all 280 frames (1 jiffy each). Linux (Xcursor and Hyprcursor) plays 140 frames at 30 fps. The
   cycle length and shape sequence stay official everywhere.
 - **Windows and Linux builds aren't tested on those systems yet.** The validator parses every
-  `.cur`, `.ani` and Xcursor file back and checks its structure, sizes, hotspots and loop length.
+  `.cur`, `.ani`, Xcursor and Hyprcursor file back and checks its structure, sizes, hotspots and loop length.
   It can't check how a given Windows version or desktop shows them. The `.cur` and `.ani` images
   are PNG-compressed, which Windows supports from Vista on.
 - **No transitions between cursors.** Every platform swaps cursor images instantly, and animated
@@ -212,11 +229,11 @@ design/      tokens.json, variants.json (colour variants), geometry.mjs (shape h
              cursors.mjs (every cursor), animation-spec.md
 cursors/     editable SVG export of each cursor in purple (frame SVGs for the upload animation)
 design/      platforms.mjs (Windows and Linux role maps)
-tools/       render.mjs, package.mjs (macOS), windows.mjs, linux.mjs, validate.mjs,
+tools/       render.mjs, package.mjs (macOS), windows.mjs, hyprcursor.mjs, linux.mjs, validate.mjs,
              previews.mjs, sheet.mjs, palettes.mjs
 previews/    gallery (SVG + PNG, light and dark), variants overview and animation GIFs
 dist/macos/  M3E-<Colour>.cursor and M3E-<Colour>-ReducedMotion.cursor for each colour
-dist/windows/ and dist/linux/  built locally and published as release assets (not in git)
+dist/windows/, dist/hyprcursor/ and dist/linux/  built locally and published as release assets (not in git)
 build/       generated frames (not part of the distribution)
 ```
 
@@ -239,6 +256,7 @@ npm run build      # render → macOS, Windows, Linux → validate → previews,
 | `npm run render` | Exports the SVGs and renders every cursor in every colour at every size the three platforms use (`targets` in `design/tokens.json`). Vector cursors are drawn at each device scale, so nothing is a bitmap upscale. Loading cursors are frames of the live `<m3e-loading-indicator>`, paused and seeked with the Web Animations API. |
 | `npm run package` | Writes a `.cursor` theme and a reduced-motion theme per variant, in MaCursor's native plist format, the same format as MaCursor's own `CursorThemeWriter.swift`. |
 | `npm run windows` | Writes `dist/windows/M3E-<Colour>/`: `.cur` / `.ani` files and an `install.inf` that registers the scheme. |
+| `npm run hyprcursor` | Writes `dist/hyprcursor/M3E-<Colour>/`: `manifest.hl` and one `.hlc` archive per cursor (SVG for static cursors and the upload animation, PNG frames for the loading indicator). `npm run linux` merges it into the Linux theme folders. |
 | `npm run linux` | Writes `dist/linux/M3E-<Colour>/` Xcursor themes with all alias symlinks, and a `.tar.gz` of each. |
 | `npm run validate` | Parses the Windows and Linux files back, and checks frame counts and sizes, alpha and clipping, hotspot placement, role coverage, and the plist rules MaCursor applies to its own themes. |
 | `npm run palettes` | Regenerates `design/variants.json` from the seed colours in `tools/palettes.mjs`. To add a variant, add a seed there. |
