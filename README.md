@@ -36,7 +36,8 @@ Get the build for your platform from the
 
 ![Variants](previews/variants.png)
 
-| Variant | Body (T40) | Badge (T90) | Glyph / edge (T10) |
+<!-- colours:start -->
+| Variant | Body | Badge | Glyph |
 |---|---|---|---|
 | Purple | `#6750A4` | `#EADDFF` | `#21005D` |
 | Blue | `#0856CF` | `#DAE2FF` | `#001847` |
@@ -48,6 +49,7 @@ Get the build for your platform from the
 | Graphite | `#605D64` | `#E6E0E9` | `#1D1B20` |
 | Light Blue | `#96CCFF` | `#004A75` | `#CEE5FF` |
 | Pale Blue | `#CEE5FF` | `#00639A` | `#E8F2FF` |
+<!-- colours:end -->
 
 Each variant takes tones 40, 30, 90 and 10 from the M3 tonal palette of its seed colour, using
 Google's [material-color-utilities](https://github.com/material-foundation/material-color-utilities).
@@ -58,6 +60,29 @@ light body (tone 80 or 90), a dark FAB badge (tone 30 or 40) with a light glyph,
 edge, with a dark rim inside and a white hairline outside, so they stay visible on white. The
 loading indicator flips with them: a dark container with a light morphing shape, the component's
 own dark-theme look.
+
+### Adding a colour
+
+`npm run new-colour` adds a colour from a single seed, or from three colours you pick yourself:
+
+```bash
+npm run new-colour -- "Mint=#3EB489"                    # roles from the seed's M3 tonal palette
+npm run new-colour -- "Sky=#0288D1:light"               # light cursor, like Light Blue (:pale is lighter)
+npm run new-colour -- "Slate=#5F6B7A:neutral"           # near-grey from the seed's hue, like Graphite
+npm run new-colour -- "Brand=#1A73E8,#D2E3FC,#062E6F"   # explicit body, badge and glyph
+```
+
+Quote each colour, because the shell reads `#` as a comment. Several colours can go in one call.
+The script prints the roles and warns when a badge and glyph, or the body and its edge, are below
+3:1 contrast. It then adds the colour to `design/palettes.json`, regenerates
+`design/variants.json` and updates the table above.
+
+- `--dry-run` only prints the roles and warnings.
+- `--preview` also renders a few cursors to `build/preview-<Name>.png` on four backgrounds.
+- `--build` also builds the colour for every platform and validates it.
+- `--replace` redefines an existing colour.
+
+Nothing is committed for you.
 
 ## Install
 
@@ -233,12 +258,13 @@ back to Breeze, then Adwaita. The full list is in [`design/platforms.mjs`](desig
 ## Project layout
 
 ```text
-design/      tokens.json, variants.json (colour variants), geometry.mjs (shape helpers),
+design/      tokens.json, palettes.json (colour list), variants.json (generated colour roles),
+             geometry.mjs (shape helpers),
              cursors.mjs (every cursor), animation-spec.md
 cursors/     editable SVG export of each cursor in purple (frame SVGs for the upload animation)
 design/      platforms.mjs (Windows and Linux role maps)
 tools/       render.mjs, package.mjs (macOS), windows.mjs, hyprcursor.mjs, linux.mjs, validate.mjs,
-             previews.mjs, sheet.mjs, palettes.mjs
+             previews.mjs, sheet.mjs, palettes.mjs, new-colour.mjs
 previews/    gallery (SVG + PNG, light and dark), variants overview and animation GIFs
 dist/macos/  M3E-<Colour>.cursor and M3E-<Colour>-ReducedMotion.cursor for each colour
 dist/windows/, dist/hyprcursor/ and dist/linux/  built locally and published as release assets (not in git)
@@ -267,7 +293,8 @@ npm run build      # render → macOS, Windows, Linux → validate → previews,
 | `npm run hyprcursor` | Writes `dist/hyprcursor/M3E-<Colour>/`: `manifest.hl` and one `.hlc` archive per cursor (SVG for static cursors and the upload animation, PNG frames for the loading indicator). `npm run linux` merges it into the Linux theme folders. |
 | `npm run linux` | Writes `dist/linux/M3E-<Colour>/` Xcursor themes with all alias symlinks, and a `.tar.gz` of each. |
 | `npm run validate` | Parses the Windows and Linux files back, and checks frame counts and sizes, alpha and clipping, hotspot placement, role coverage, and the plist rules MaCursor applies to its own themes. |
-| `npm run palettes` | Regenerates `design/variants.json` from the seed colours in `tools/palettes.mjs`. To add a variant, add a seed there. |
+| `npm run new-colour -- "Name=#hex"` | Adds a colour: see [Adding a colour](#adding-a-colour). |
+| `npm run palettes` | Regenerates `design/variants.json` and the README colour table from `design/palettes.json`. |
 | `M3E_VARIANT=blue npm run render` | Renders a single variant. `package` takes variant ids as arguments: `node tools/package.mjs blue`. |
 | `npm run previews` | Writes the gallery and animation GIFs. |
 | `node tools/sheet.mjs out.png [frame] [names…]` | Inspection sheet at true 1× and 2× pixels over four backgrounds, with hotspots marked. |
