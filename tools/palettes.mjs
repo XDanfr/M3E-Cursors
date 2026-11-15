@@ -26,32 +26,39 @@ const tokens = JSON.parse(readFileSync(join(ROOT, 'design/tokens.json')));
 const hex = (argb) => hexFromArgb(argb).toUpperCase();
 const hct = (h) => Hct.fromInt(argbFromHex(h));
 
-const standard = (p) => ({
+// Tertiary (the expressive accent on shape badges and cursor centres) follows M3's tonal-spot
+// scheme: the primary hue + 60 degrees at chroma 24 (less for near-neutral colours).
+const tertiaryOf = (p, chroma = 24) => TonalPalette.fromHueAndChroma((p.hue + 60) % 360, Math.min(chroma, 24));
+const standard = (p, t = tertiaryOf(p)) => ({
   primary: hex(p.tone(40)), primary30: hex(p.tone(30)),
   primaryContainer: hex(p.tone(90)), onPrimaryContainer: hex(p.tone(10)), hairline: hex(p.tone(10)),
+  tertiaryContainer: hex(t.tone(90)), onTertiaryContainer: hex(t.tone(10)),
 });
-const light = (p, lift) => ({
+const light = (p, lift, t = tertiaryOf(p)) => ({
   primary: hex(p.tone(80 + lift)), primary30: hex(p.tone(60 + lift)),
   primaryContainer: hex(p.tone(30 + lift)), onPrimaryContainer: hex(p.tone(90 + lift / 2)),
+  tertiaryContainer: hex(t.tone(30 + lift)), onTertiaryContainer: hex(t.tone(90 + lift / 2)),
   rim: hex(p.tone(10 + lift)), hairline: '#FFFFFF',
 });
 // Explicit body / badge / glyph. The detail colour and the edge follow the body: a light body
 // (tone 60 or more) gets the reversed dark-rim edge, a darker one the standard white rim.
 function explicit({ body, badge, glyph }) {
   const b = hct(body), p = TonalPalette.fromHueAndChroma(b.hue, Math.min(b.chroma, 48));
-  const isLight = b.tone >= 60;
+  const isLight = b.tone >= 60, t = tertiaryOf(TonalPalette.fromHueAndChroma(b.hue, b.chroma));
   return {
     primary: body.toUpperCase(),
     primary30: hex(Hct.from(b.hue, b.chroma, Math.max(5, b.tone - (isLight ? 20 : 10))).toInt()),
     primaryContainer: badge.toUpperCase(), onPrimaryContainer: glyph.toUpperCase(),
+    tertiaryContainer: hex(t.tone(isLight ? 30 : 90)), onTertiaryContainer: hex(t.tone(isLight ? 90 : 10)),
     ...(isLight ? { rim: hex(p.tone(10)), hairline: '#FFFFFF' } : { hairline: hex(p.tone(10)) }),
   };
 }
 
 export function roles(e) {
   if (e.colors) return { scheme: hct(e.colors.body).tone >= 60 ? 'light' : undefined, colors: explicit(e.colors) };
-  if (e.style === 'baseline') return { colors: Object.fromEntries(['primary', 'primary30', 'primaryContainer', 'onPrimaryContainer', 'hairline'].map((k) => [k, tokens.color[k].value])) };
-  if (e.chroma != null) return { seedLabel: `hue ${Math.round(hct(e.seed).hue)}, chroma ${e.chroma}`, colors: standard(TonalPalette.fromHueAndChroma(hct(e.seed).hue, e.chroma)) };
+  if (e.style === 'baseline') return { colors: Object.fromEntries(['primary', 'primary30', 'primaryContainer', 'onPrimaryContainer', 'hairline', 'tertiaryContainer', 'onTertiaryContainer'].map((k) => [k, tokens.color[k].value])) };
+  if (e.chroma != null) { const p = TonalPalette.fromHueAndChroma(hct(e.seed).hue, e.chroma);
+    return { seedLabel: `hue ${Math.round(hct(e.seed).hue)}, chroma ${e.chroma}`, colors: standard(p, tertiaryOf(p, e.chroma * 2)) }; }
   const p = TonalPalette.fromInt(argbFromHex(e.seed));
   if (e.style === 'light') return { scheme: 'light', colors: light(p, 0) };
   if (e.style === 'pale') return { scheme: 'light', colors: light(p, 10) };
@@ -73,6 +80,7 @@ export const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) 
 export function warnings(v) {
   const c = v.colors, out = [], rim = c.rim ?? tokens.color.rim.value;
   if (contrast(c.primaryContainer, c.onPrimaryContainer) < 3) out.push(`badge ${c.primaryContainer} and glyph ${c.onPrimaryContainer} contrast is ${contrast(c.primaryContainer, c.onPrimaryContainer).toFixed(1)}:1 (aim for 3:1)`);
+  if (c.tertiaryContainer && contrast(c.tertiaryContainer, c.onTertiaryContainer) < 3) out.push(`tertiary badge ${c.tertiaryContainer} and glyph ${c.onTertiaryContainer} contrast is ${contrast(c.tertiaryContainer, c.onTertiaryContainer).toFixed(1)}:1 (aim for 3:1)`);
   if (contrast(c.primary, rim) < 3) out.push(`body ${c.primary} and rim ${rim} contrast is ${contrast(c.primary, rim).toFixed(1)}:1 (aim for 3:1)`);
   return out;
 }
@@ -85,8 +93,8 @@ export function generate() {
   const readme = join(ROOT, 'README.md'), md = readFileSync(readme, 'utf8');
   const [a, b] = ['<!-- colours:start -->', '<!-- colours:end -->'];
   if (md.includes(a) && md.includes(b)) {
-    const table = ['| Variant | Body | Badge | Glyph |', '|---|---|---|---|',
-      ...variants.map((v) => `| ${v.name} | \`${v.colors.primary}\` | \`${v.colors.primaryContainer}\` | \`${v.colors.onPrimaryContainer}\` |`)].join('\n');
+    const table = ['| Variant | Body | Container | Accent badge | Accent glyph |', '|---|---|---|---|---|',
+      ...variants.map((v) => `| ${v.name} | \`${v.colors.primary}\` | \`${v.colors.primaryContainer}\` | \`${v.colors.tertiaryContainer}\` | \`${v.colors.onTertiaryContainer}\` |`)].join('\n');
     writeFileSync(readme, md.slice(0, md.indexOf(a) + a.length) + '\n' + table + '\n' + md.slice(md.indexOf(b)));
   }
   return variants;

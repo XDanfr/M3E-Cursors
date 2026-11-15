@@ -9,7 +9,9 @@
       "primary30": "#4F378B",
       "primaryContainer": "#EADDFF",
       "onPrimaryContainer": "#21005D",
-      "hairline": "#21005D"
+      "hairline": "#21005D",
+      "tertiaryContainer": "#FFD8E4",
+      "onTertiaryContainer": "#31111D"
     }
   },
   {
@@ -22,7 +24,9 @@
       "primary30": "#0040A1",
       "primaryContainer": "#DAE2FF",
       "onPrimaryContainer": "#001847",
-      "hairline": "#001847"
+      "hairline": "#001847",
+      "tertiaryContainer": "#FED7F9",
+      "onTertiaryContainer": "#2B122B"
     }
   },
   {
@@ -35,7 +39,9 @@
       "primary30": "#004F4F",
       "primaryContainer": "#A0F0F0",
       "onPrimaryContainer": "#002020",
-      "hairline": "#002020"
+      "hairline": "#002020",
+      "tertiaryContainer": "#D3E4FF",
+      "onTertiaryContainer": "#041C35"
     }
   },
   {
@@ -48,7 +54,9 @@
       "primary30": "#205107",
       "primaryContainer": "#B8F398",
       "onPrimaryContainer": "#072100",
-      "hairline": "#072100"
+      "hairline": "#072100",
+      "tertiaryContainer": "#BBEBEC",
+      "onTertiaryContainer": "#002020"
     }
   },
   {
@@ -61,7 +69,9 @@
       "primary30": "#6A3C00",
       "primaryContainer": "#FFDCBE",
       "onPrimaryContainer": "#2D1600",
-      "hairline": "#2D1600"
+      "hairline": "#2D1600",
+      "tertiaryContainer": "#DCE8B4",
+      "onTertiaryContainer": "#161E00"
     }
   },
   {
@@ -74,7 +84,9 @@
       "primary30": "#910809",
       "primaryContainer": "#FFDAD5",
       "onPrimaryContainer": "#410001",
-      "hairline": "#410001"
+      "hairline": "#410001",
+      "tertiaryContainer": "#FCDFA6",
+      "onTertiaryContainer": "#261A00"
     }
   },
   {
@@ -87,7 +99,9 @@
       "primary30": "#7B2949",
       "primaryContainer": "#FFD9E2",
       "onPrimaryContainer": "#3E001D",
-      "hairline": "#3E001D"
+      "hairline": "#3E001D",
+      "tertiaryContainer": "#FFDCC2",
+      "onTertiaryContainer": "#2E1500"
     }
   },
   {
@@ -100,7 +114,9 @@
       "primary30": "#48464C",
       "primaryContainer": "#E6E0E9",
       "onPrimaryContainer": "#1D1B20",
-      "hairline": "#1D1B20"
+      "hairline": "#1D1B20",
+      "tertiaryContainer": "#F9DBE2",
+      "onTertiaryContainer": "#27171C"
     }
   },
   {
@@ -114,6 +130,8 @@
       "primary30": "#2B97E1",
       "primaryContainer": "#004A75",
       "onPrimaryContainer": "#CEE5FF",
+      "tertiaryContainer": "#4F4061",
+      "onTertiaryContainer": "#EEDBFF",
       "rim": "#001D32",
       "hairline": "#FFFFFF"
     }
@@ -129,6 +147,8 @@
       "primary30": "#51B2FE",
       "primaryContainer": "#00639A",
       "onPrimaryContainer": "#E8F2FF",
+      "tertiaryContainer": "#68587A",
+      "onTertiaryContainer": "#F9EDFF",
       "rim": "#003353",
       "hairline": "#FFFFFF"
     }
