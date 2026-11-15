@@ -199,6 +199,21 @@ export const cursors = [
   { name: 'zoom-in', label: 'Zoom in', group: 'Precision', roles: ['cursor.42'].map(ID), hotspot: [13.5, 13.5], svg: () => zoom(true) },
   { name: 'zoom-out', label: 'Zoom out', group: 'Precision', roles: ['cursor.43'].map(ID), hotspot: [13.5, 13.5], svg: () => zoom(false) },
   { name: 'screenshot-window', label: 'Screenshot window', group: 'Precision', roles: ['cursor.9'].map(ID), hotspot: [16, 16], svg: () => cameraSVG },
+  // Resize: split views (columns / rows) — a divider bar between the arrows
+  { name: 'col-resize', label: 'Column resize', group: 'Resize', roles: ['cursor.19'].map(ID), hotspot: [16, 16], svg: () => arrowsSVG(0, { bar: true }) },
+  { name: 'col-resize-left', label: 'Column resize ←', group: 'Resize', roles: ['cursor.17'].map(ID), hotspot: [16, 16], svg: () => arrowsSVG(0, { bar: true, heads: 'neg' }) },
+  { name: 'col-resize-right', label: 'Column resize →', group: 'Resize', roles: ['cursor.18'].map(ID), hotspot: [16, 16], svg: () => arrowsSVG(0, { bar: true, heads: 'pos' }) },
+  { name: 'row-resize', label: 'Row resize', group: 'Resize', roles: ['cursor.23'].map(ID), hotspot: [16, 16], svg: () => arrowsSVG(90, { bar: true }) },
+  { name: 'row-resize-up', label: 'Row resize ↑', group: 'Resize', roles: ['cursor.21'].map(ID), hotspot: [16, 16], svg: () => arrowsSVG(90, { bar: true, heads: 'neg' }) },
+  { name: 'row-resize-down', label: 'Row resize ↓', group: 'Resize', roles: ['cursor.22'].map(ID), hotspot: [16, 16], svg: () => arrowsSVG(90, { bar: true, heads: 'pos' }) },
+  // Resize: window edges and corners
+  { name: 'resize-ew', label: 'Horizontal resize', group: 'Resize', roles: ['cursor.28'].map(ID), hotspot: [16, 16], svg: () => arrowsSVG(0) },
+  { name: 'resize-ns', label: 'Vertical resize', group: 'Resize', roles: ['cursor.32'].map(ID), hotspot: [16, 16], svg: () => arrowsSVG(90) },
+  { name: 'resize-nwse', label: 'Diagonal resize ↖↘', group: 'Resize', roles: ['cursor.34'].map(ID), hotspot: [16, 16], svg: () => arrowsSVG(45, { L: 11 }) },
+  { name: 'resize-nesw', label: 'Diagonal resize ↗↙', group: 'Resize', roles: ['cursor.30'].map(ID), hotspot: [16, 16], svg: () => arrowsSVG(-45, { L: 11 }) },
+  ...[['e', 27, 0], ['w', 38, 180], ['n', 31, -90], ['s', 36, 90], ['ne', 29, -45], ['nw', 33, -135], ['se', 35, 45], ['sw', 37, 135]]
+    .map(([d, n, deg]) => ({ name: `resize-${d}`, label: `Edge resize ${d.toUpperCase()}`, group: 'Resize',
+      roles: [ID(`cursor.${n}`)], hotspot: [16, 16], svg: () => arrowsSVG(deg, { heads: 'pos', L: d.length > 1 ? 9.5 : 9 }) })),
 ];
 
 export const byName = Object.fromEntries(cursors.map((c) => [c.name, c]));
