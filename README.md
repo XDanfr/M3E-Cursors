@@ -296,6 +296,7 @@ npm run build      # render → macOS, Windows, Linux → validate → previews,
 | `npm run new-colour -- "Name=#hex"` | Adds a colour: see [Adding a colour](#adding-a-colour). |
 | `npm run palettes` | Regenerates `design/variants.json` and the README colour table from `design/palettes.json`. |
 | `M3E_VARIANT=blue npm run render` | Renders a single variant. `package` takes variant ids as arguments: `node tools/package.mjs blue`. |
+| `npm run gallery` | Builds the MaCursor gallery editions (`dist/gallery/M3ECursor<Colour>.cursor`: busy cursors at 30 fps, 32 / 64 px, ~5 MB each) and their gallery screenshots. |
 | `npm run previews` | Writes the gallery and animation GIFs. |
 | `node tools/sheet.mjs out.png [frame] [names…]` | Inspection sheet at true 1× and 2× pixels over four backgrounds, with hotspots marked. |
 
