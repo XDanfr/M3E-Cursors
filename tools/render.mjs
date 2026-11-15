@@ -1,4 +1,5 @@
-// Renders every cursor to PNG frames at 32, 64, 160 and 320 px, and exports editable SVG sources.
+// Renders every cursor to PNG frames at every size the macOS, Windows and Linux themes use
+// (design/tokens.json "targets"), and exports editable SVG sources.
 //
 //   node tools/render.mjs [name ...]                    every colour variant
 //   M3E_VARIANT=blue node tools/render.mjs [name ...]   one variant
@@ -12,7 +13,7 @@ import { spawnSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cursors } from '../design/cursors.mjs';
-import { T, C, VARIANT, VARIANTS, rgba, pixelSizesFor } from '../design/geometry.mjs';
+import { T, C, VARIANT, VARIANTS, rgba, renderSizesFor } from '../design/geometry.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -80,7 +81,7 @@ for (const c of list) {
     }
   }
 
-  await Promise.all(pixelSizesFor(frames).map(async (px) => {
+  await Promise.all(renderSizesFor(frames).map(async (px) => {
     const s = px / 32;
     const dir = join(outDir, String(px));
     mkdirSync(dir, { recursive: true });
@@ -96,7 +97,7 @@ for (const c of list) {
       if (c.loading) await seek(page, (i * LOADING_MS) / frames);
       else await page.evaluate((s) => { document.getElementById('c').innerHTML = s; }, c.svg(i));
       await page.screenshot({ path: join(dir, `${String(i).padStart(2, '0')}.png`),
-        clip: { x: 0, y: 0, width: 32, height: 32 }, omitBackground: true, animations: 'allow' });
+        clip: { x: 0, y: 0, width: 32, height: 32 }, scale: 'device', omitBackground: true, animations: 'allow' });
     }
     await page.close();
   }));
