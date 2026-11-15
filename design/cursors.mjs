@@ -55,32 +55,73 @@ const ibeamParts = [
 
 // ---------- Hands ----------------------------------------------------------------------
 // Built from pills and a squircle palm, the same vocabulary as the badges and I-beam.
-const palm = (y0, y1) => ({ d: rrect(10.2, y0, 13.8, y1 - y0, 5.2) });
-const pill = (a, b, w = 4.2) => ({ d: line(a, b), w });
-const seam = (a, b) => ({ d: line(a, b), w: 0.8 });
-const pointingParts = [
-  pill([12.6, 5.6], [12.6, 16], 4.4),
-  pill([17.0, 12.4], [17.0, 15]),
-  pill([21.2, 13.4], [21.2, 16]),
-  pill([10.6, 21.6], [7.2, 17.4]),
-  palm(13.2, 27),
-];
-const openParts = [
-  pill([12.4, 6.6], [12.8, 15], 3.9),
-  pill([16.4, 5.4], [16.4, 14], 3.9),
-  pill([20.4, 5.8], [20.0, 14.5], 3.9),
-  pill([23.6, 9.6], [22.6, 16], 3.6),
-  pill([10.8, 21.4], [6.6, 15.6], 3.9),
-  palm(13.0, 26.6),
-];
-const closedParts = [
-  pill([12.6, 12.0], [12.6, 14], 3.9),
-  pill([16.5, 11.0], [16.5, 14], 3.9),
-  pill([20.4, 11.6], [20.4, 14], 3.9),
-  pill([23.4, 13.4], [23.4, 15.5], 3.4),
-  pill([10.6, 20.4], [8.8, 17.6], 3.9),
-  palm(12.6, 25.4),
-];
+// One builder keeps the three hands consistent:
+//   - fingers are parallel pills that overlap their neighbours by 1 pt, so no hairline gaps
+//     show between them at any size; seam lines mark where one finger ends and the next begins;
+//   - the palm is flush with the outermost fingers, and its top corners sit under them, so no
+//     palm corner peeks out beside a finger;
+//   - both creases where the thumb meets the palm get a rounded fillet instead of a pinched notch.
+const SEAM_W = 0.8;
+const unit = ([x, y]) => { const l = Math.hypot(x, y); return [x / l, y / l]; };
+const add = (p, v, k = 1) => [p[0] + v[0] * k, p[1] + v[1] * k];
+// A true fillet: a circle of radius rho tangent to two straight edges that meet at C (u1, u2: unit
+// directions along each edge, away from C; in1, in2: unit normals pointing into the solid shape).
+// rho shrinks if needed so the tangent points stay within maxLen of C (on straight edge only).
+// The patch also reaches 0.8 pt into the solid, so it overlaps both shapes and no seam shows.
+function fillet(C, u1, u2, in1, in2, rho, maxLen = Infinity) {
+  const theta = Math.acos(Math.max(-1, Math.min(1, u1[0] * u2[0] + u1[1] * u2[1])));
+  rho = Math.min(rho, maxLen * Math.tan(theta / 2));
+  const d = rho / Math.tan(theta / 2), m = unit([u1[0] + u2[0], u1[1] + u2[1]]);
+  const T1 = add(C, u1, d), T2 = add(C, u2, d), O = add(C, m, rho / Math.sin(theta / 2));
+  const sweep = (T1[0] - O[0]) * (T2[1] - O[1]) - (T1[1] - O[1]) * (T2[0] - O[0]) > 0 ? 1 : 0;
+  return { d: `M${P(T1)}A${+rho.toFixed(3)},${+rho.toFixed(3)} 0 0,${sweep} ${P(T2)}` +
+    `L${P(add(T2, in2, 0.8))}L${P(add(C, m, -0.8))}L${P(add(T1, in1, 0.8))}Z` };
+}
+// Where a line through p0 with direction u crosses x = X.
+const atX = (p0, u, X) => add(p0, u, (X - p0[0]) / u[0]);
+// fingers: [{ x, top, w }] left to right (top = highest point of the pill); palmTop: y where the
+// palm starts (no higher than the outer fingers' cap centres); thumb: { base, tip, w }, with its
+// base cap entirely inside the palm (inside its rounded corner too), so no part of the cap pokes out.
+function hand({ fingers, palmTop, bottom, radius, thumb }) {
+  const left = fingers[0].x - fingers[0].w / 2, last = fingers[fingers.length - 1];
+  const right = last.x + last.w / 2, fingerBottom = palmTop + 3;
+  const parts = fingers.map(({ x, top, w }) => ({ d: line([x, top + w / 2], [x, Math.max(fingerBottom, top + w / 2)]), w }));
+  parts.push({ d: roundedPoly([[left, palmTop], [right, palmTop], [right, bottom], [left, bottom]], [0.6, 0.6, radius, radius]) });
+  const { base: B, tip: T, w } = thumb, r = w / 2, u = unit([T[0] - B[0], T[1] - B[1]]), n = [-u[1], u[0]];
+  parts.push({ d: line(B, T), w });
+  // The left side is straight from the index finger's cap centre down to the palm's bottom corner.
+  const straightTop = fingers[0].top + fingers[0].w / 2, straightBottom = bottom - radius;
+  const up = add(B, n, r), low = add(B, n, -r), C1 = atX(up, u, left), C2 = atX(low, u, left);
+  // Each fillet stays on straight edges: the palm's side and the thumb's side up to its tip cap.
+  const dist = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]);
+  parts.push(fillet(C1, [0, -1], u, [1, 0], [-n[0], -n[1]], 1.6, Math.min(C1[1] - straightTop, 0.85 * dist(C1, add(T, n, r)))));
+  // A low thumb meets the palm's rounded bottom corner instead, where the angle is wide open and
+  // needs no fillet.
+  if (C2[1] < straightBottom - 0.2)
+    parts.push(fillet(C2, [0, 1], u, [1, 0], n, 1.6, Math.min(straightBottom - C2[1], 0.85 * dist(C2, add(T, n, -r)))));
+  // Seams sit in the middle of each 1 pt overlap, from just under the shorter finger's tip.
+  const seams = fingers.slice(1).map((f, i) => {
+    const p = fingers[i], x = (p.x + p.w / 2 + f.x - f.w / 2) / 2;
+    return { d: line([x, Math.max(p.top, f.top) + Math.min(p.w, f.w) * 0.75], [x, fingerBottom + 0.6]), w: SEAM_W };
+  });
+  return svg(layer(parts) + glyph(seams, C.primary30));
+}
+// Pointing: index up, three folded knuckles, thumb out to the left.
+const POINT_TIP = [12.4, 3.5];
+const pointingSVG = () => hand({
+  fingers: [{ x: 12.4, top: POINT_TIP[1], w: 4.4 }, { x: 15.7, top: 11.0, w: 4.2 }, { x: 18.9, top: 11.6, w: 4.2 }, { x: 22.0, top: 12.8, w: 4.0 }],
+  palmTop: 14.8, bottom: 27, radius: 5.4, thumb: { base: [12.5, 22.4], tip: [7.2, 17.4], w: 4.2 },
+});
+// Open: four fingers up, middle longest, pinky short.
+const openSVG = () => hand({
+  fingers: [{ x: 12.4, top: 6.4, w: 4.2 }, { x: 15.6, top: 4.8, w: 4.2 }, { x: 18.8, top: 5.6, w: 4.2 }, { x: 21.8, top: 8.6, w: 3.8 }],
+  palmTop: 10.5, bottom: 26.6, radius: 5.4, thumb: { base: [12.6, 22.2], tip: [6.6, 15.4], w: 4.2 },
+});
+// Closed: the same four fingers curled down to knuckles, thumb tucked in.
+const closedSVG = () => hand({
+  fingers: [{ x: 12.4, top: 11.8, w: 4.2 }, { x: 15.6, top: 11.0, w: 4.2 }, { x: 18.8, top: 11.4, w: 4.2 }, { x: 21.8, top: 12.4, w: 3.8 }],
+  palmTop: 14.3, bottom: 25.4, radius: 4.8, thumb: { base: [12.6, 20.6], tip: [8.6, 17.2], w: 4.0 },
+});
 
 // ---------- Badge glyphs ---------------------------------------------------------------
 const helpGlyph = glyph([
@@ -159,18 +200,18 @@ export const cursors = [
   },
   {
     name: 'pointer', label: 'Link pointer', group: 'Everyday',
-    roles: ['cursor.13'].map(ID), hotspot: [12.6, 3.4],
-    svg: () => svg(layer(pointingParts) + glyph([seam([14.9, 13.6], [14.9, 17]), seam([19.1, 14.4], [19.1, 17.4])], C.primary30)),
+    roles: ['cursor.13'].map(ID), hotspot: POINT_TIP,
+    svg: pointingSVG,
   },
   {
     name: 'grab', label: 'Open hand', group: 'Movement',
     roles: ['cursor.12'].map(ID), hotspot: [16, 15],
-    svg: () => svg(layer(openParts)),
+    svg: openSVG,
   },
   {
     name: 'grabbing', label: 'Closed hand', group: 'Movement',
     roles: ['cursor.11'].map(ID), hotspot: [16, 16],
-    svg: () => svg(layer(closedParts) + glyph([seam([14.55, 12.4], [14.55, 15.6]), seam([18.45, 12.6], [18.45, 15.6]), seam([22.1, 13.6], [22.1, 16])], C.primary30)),
+    svg: closedSVG,
   },
   {
     name: 'text', label: 'Text I-beam', group: 'Everyday',
