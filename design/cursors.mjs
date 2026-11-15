@@ -98,6 +98,26 @@ const forbiddenBadge = layer([{ d: circle(BX, BY, 6.4) }], C.errorContainer) + g
   { d: line(...at([[-2.6, 2.6], [2.6, -2.6]])), w: G },
 ], C.onErrorContainer);
 
+// ---------- Directional arrows (resize / move) -----------------------------------------
+const W = T.shape.strokeWeight.value;
+const xf = (deg) => { const a = deg * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
+  return ([x, y]) => [16 + x * c - y * s, 16 + x * s + y * c]; };
+const head = (tip, dir, t) => { // rounded triangular head pointing along dir (+1 / -1) on the x axis
+  const b = tip - dir * 5.0;
+  return { d: roundedPoly([[tip, 0], [b, 4.3], [b, -4.3]].map(t), [0.9, 1.3, 1.3]) };
+};
+// heads: 'both' | 'pos' | 'neg';  bar: draw a divider bar at x = 0 (split-view resize)
+function arrows(deg, { L = 10.5, heads = 'both', bar = false } = {}) {
+  const t = xf(deg), parts = [];
+  const pos = heads !== 'neg', neg = heads !== 'pos';
+  const inner = bar ? 3.6 : 0;
+  if (pos) parts.push(head(L, 1, t), { d: line(t([bar ? inner : neg ? 0 : -L + 3.5, 0]), t([L - 3, 0])), w: W });
+  if (neg) parts.push(head(-L, -1, t), { d: line(t([bar ? -inner : pos ? 0 : L - 3.5, 0]), t([-L + 3, 0])), w: W });
+  if (bar) parts.push({ d: line(t([0, -7.5]), t([0, 7.5])), w: W });
+  return parts;
+}
+const arrowsSVG = (deg, opts) => svg(layer(arrows(deg, opts)));
+
 // ---------- Definitions ----------------------------------------------------------------
 export const cursors = [
   {
@@ -152,6 +172,12 @@ export const cursors = [
     roles: ['ArrowCtx', 'cursor.24'].map(ID), hotspot: ARROW_HOT, svg: () => arrowWith(fab() + menuGlyph) },
   { name: 'not-allowed', label: 'Unavailable', group: 'Everyday',
     roles: ['cursor.3'].map(ID), hotspot: ARROW_HOT, svg: () => arrowWith(forbiddenBadge) },
+  // Movement
+  { name: 'alias', label: 'Alias / link drop', group: 'Movement',
+    roles: ['Alias', 'cursor.2'].map(ID), hotspot: ARROW_HOT, svg: () => arrowWith(fab() + aliasGlyph) },
+  { name: 'move', label: 'Move', group: 'Movement',
+    roles: ['Move', 'cursor.39'].map(ID), hotspot: [16, 16],
+    svg: () => svg(layer([...arrows(0, { L: 11.5 }), ...arrows(90, { L: 11.5 })]) + glyph([{ d: circle(16, 16, 1.6) }], C.primaryContainer)) },
 ];
 
 export const byName = Object.fromEntries(cursors.map((c) => [c.name, c]));
