@@ -53,11 +53,19 @@ This is the cursor macOS shows while you drag something onto a target that will 
 example a file over a browser upload area.
 
 - 24 frames × 100 ms gives a 2.4 s loop.
-- **0 – 600 ms:** the FAB badge holds a **plus**.
-- **From 700 ms:** the plus morphs into an **upload arrow**. Its horizontal arm folds up into the arrowhead.
-  - The glyph follows the M3E default-effects spring (damping 1.0, stiffness 1600), so it doesn't overshoot.
-  - The FAB grows to 1.10× on the M3E expressive spatial spring (damping 0.8, stiffness 380), with a small overshoot.
-- **From 1.8 s:** both springs run in reverse and settle back on the plus before the loop restarts.
+- **0 – 600 ms:** a **sunny** badge (Material Shape library) holds a **plus**.
+- **From 700 ms:** the badge morphs into a **soft burst** while the plus folds into an
+  **upload arrow**: its horizontal arm folds up into the arrowhead.
+  - Shape and glyph morph together on a critically damped spring (damping 1.0, stiffness 150). It's
+    slow enough to show about four in-between frames at 100 ms per frame, and doesn't overshoot.
+  - The badge turns 22.5° and grows 4 % on the M3E expressive spatial spring (damping 0.8,
+    stiffness 380), with a small overshoot.
+  - The burst settles 6 % smaller than the sunny, because its points reach further. That keeps
+    every frame inside the 32 pt canvas.
+- **From 1.8 s:** everything runs in reverse and settles back on the sunny and plus before the loop
+  restarts.
+- The morph samples both shapes into 240 evenly spaced points and interpolates between them, the
+  same idea as the loading indicator's 300-point clip paths.
 - The arrow tip doesn't move, so the cursor stays easy to aim.
 - **"Accepted" checkmark:** not implemented. macOS has no cursor role for "drop accepted", so a
   checkmark would show during the drag, before anything has been accepted.
@@ -75,5 +83,6 @@ on the same palm and pill grid, so the swap reads as one hand closing.
 |---|---|
 | Spatial (scale, position) | damping 0.8, stiffness 380: M3E expressive default spatial |
 | Effects (morph, colour) | damping 1.0, stiffness 1600: no overshoot (M3E default effects) |
+| Shape morphs | damping 1.0, stiffness 150: no overshoot, spread over several frames |
 
 See `spring()` in `design/geometry.mjs`.
