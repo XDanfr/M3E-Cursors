@@ -74,7 +74,7 @@ mkdirSync(join(out, 'hyprcursors'), { recursive: true });
 writeFileSync(join(out, 'manifest.hl'), [
   `name = M3E ${VARIANT.name}`,
   `description = Material 3 Expressive cursors, ${VARIANT.name.toLowerCase()} palette`,
-  'version = 1.0',
+  `version = ${pkg.version}`,
   `author = ${pkg.author}`,
   'cursors_directory = hyprcursors', '',
 ].join('\n'));
