@@ -1,7 +1,8 @@
-# M3E Cursors for MaCursor
+# M3E Cursors
 
-A Material 3 Expressive cursor theme for macOS Tahoe 26, packaged for
-[MaCursor](https://github.com/writronic/MaCursor), in eight colours.
+Material 3 Expressive cursor themes in eight colours, for **macOS** (via
+[MaCursor](https://github.com/writronic/MaCursor)), **Windows** and **Linux** (KDE Plasma, GNOME
+and other desktops that use Xcursor themes).
 
 ![Gallery](previews/cursor-gallery.png)
 
@@ -20,20 +21,31 @@ The busy cursor is the official M3E **contained loading indicator**, rendered fr
 | ![Loading](previews/animation-preview/wait-light.gif) | ![Upload](previews/animation-preview/upload-light.gif) |
 | Wait: official contained loading indicator, 4.666 s loop at 60 fps (GIF shown at 20 fps) | Copy / upload drop: FAB plus springs into an upload arrow |
 
+## Download
+
+Get the build for your platform from the
+[latest release](https://github.com/XDanfr/M3E-Cursors/releases/latest):
+
+| Platform | Download | Contains |
+|---|---|---|
+| macOS (MaCursor) | `M3E-Cursors-macOS.zip` | `M3E-<Colour>.cursor` and `M3E-<Colour>-ReducedMotion.cursor` for every colour. Also in [`dist/macos`](dist/macos) |
+| Windows 10 / 11 | `M3E-Cursors-Windows.zip` | One folder per colour with `.cur` / `.ani` files and `install.inf` |
+| Linux (KDE, GNOME, …) | `M3E-Cursors-Linux.tar.gz` | Every colour as an Xcursor theme. Single-colour archives (`M3E-<Colour>.tar.gz`) are attached too, ready for the KDE Store / Pling |
+
 ## Colour variants
 
 ![Variants](previews/variants.png)
 
-| Variant | Theme file | Body (T40) | Badge (T90) | Glyph / edge (T10) |
-|---|---|---|---|---|
-| Purple | `dist/M3E-Purple.cursor` | `#6750A4` | `#EADDFF` | `#21005D` |
-| Blue | `dist/M3E-Blue.cursor` | `#0856CF` | `#DAE2FF` | `#001847` |
-| Teal | `dist/M3E-Teal.cursor` | `#006A6A` | `#A0F0F0` | `#002020` |
-| Green | `dist/M3E-Green.cursor` | `#386A20` | `#B8F398` | `#072100` |
-| Orange | `dist/M3E-Orange.cursor` | `#8B5000` | `#FFDCBE` | `#2D1600` |
-| Red | `dist/M3E-Red.cursor` | `#B4271F` | `#FFDAD5` | `#410001` |
-| Pink | `dist/M3E-Pink.cursor` | `#984061` | `#FFD9E2` | `#3E001D` |
-| Graphite | `dist/M3E-Graphite.cursor` | `#605D64` | `#E6E0E9` | `#1D1B20` |
+| Variant | Body (T40) | Badge (T90) | Glyph / edge (T10) |
+|---|---|---|---|
+| Purple | `#6750A4` | `#EADDFF` | `#21005D` |
+| Blue | `#0856CF` | `#DAE2FF` | `#001847` |
+| Teal | `#006A6A` | `#A0F0F0` | `#002020` |
+| Green | `#386A20` | `#B8F398` | `#072100` |
+| Orange | `#8B5000` | `#FFDCBE` | `#2D1600` |
+| Red | `#B4271F` | `#FFDAD5` | `#410001` |
+| Pink | `#984061` | `#FFD9E2` | `#3E001D` |
+| Graphite | `#605D64` | `#E6E0E9` | `#1D1B20` |
 
 Each variant takes tones 40, 30, 90 and 10 from the M3 tonal palette of its seed colour, using
 Google's [material-color-utilities](https://github.com/material-foundation/material-color-utilities).
@@ -41,14 +53,16 @@ Purple keeps the M3 baseline values. Graphite is the purple hue at very low chro
 
 ## Install
 
-1. Install MaCursor (macOS 13 or later; tested here on macOS 26.7.1 with MaCursor 2.7.5).
-2. Double-click a theme in `dist/`, for example `dist/M3E-Purple.cursor`. You can also drag it onto
-   MaCursor's library window, or use **File → Import Theme…**. If MaCursor is running only in the
-   menu bar, open its library window first. A double-clicked theme can be dropped silently when
-   no window is open.
+### macOS (MaCursor)
+
+1. Install MaCursor (macOS 13 or later; tested on macOS 26.7.1 with MaCursor 2.7.5).
+2. Double-click a theme, for example `M3E-Purple.cursor`. You can also drag it onto MaCursor's
+   library window, or use **File → Import Theme…**. If MaCursor is running only in the menu bar,
+   open its library window first. A double-clicked theme can be dropped silently when no window
+   is open.
 3. Select the theme, for example **M3E Cursor Purple**, and click **Apply**.
 
-Every variant also comes as `M3E-<Colour>-ReducedMotion.cursor`. It's the same theme, but every
+Every colour also comes as `M3E-<Colour>-ReducedMotion.cursor`. It's the same theme, but every
 animated cursor holds its first frame. Cursors can't read the system's *Reduce motion* setting, so
 reduced motion has to be a separate theme. To switch automatically, use MaCursor's per-app or
 scheduled themes.
@@ -56,6 +70,34 @@ scheduled themes.
 To change the size, use MaCursor → Settings → Cursor Control → **Cursor Scale**. Every slot ships
 at 32, 64 and 160 px, and static cursors also at 320 px. They stay sharp up to 5× on Retina, and
 static cursors up to 10×.
+
+### Windows 10 / 11
+
+1. Unzip `M3E-Cursors-Windows.zip` and open the folder for your colour, for example `M3E-Purple`.
+2. Right-click `install.inf` and choose **Install**. On Windows 11 it's under **Show more
+   options**. Windows asks for administrator approval, because the cursors are copied to
+   `C:\Windows\Cursors\M3E Purple`.
+3. Open **Settings → Bluetooth & devices → Mouse → Additional mouse settings → Pointers**, choose
+   **M3E Purple** in the **Scheme** list and click **Apply**.
+
+Every `.cur` holds 32, 48, 64, 96, 128 and 256 px images, and the animated `.ani` files hold 32 to
+128 px. Windows picks the image that matches **Settings → Accessibility → Mouse pointer and touch
+→ Size** and your display scale.
+
+### Linux (KDE Plasma, GNOME and others)
+
+**KDE Plasma:** open **System Settings → Colors & Themes → Cursors**, click **Install from File…**
+and pick `M3E-Purple.tar.gz` (or the combined archive). Then select **M3E Purple** and apply.
+
+**Any desktop:** extract the archive into `~/.local/share/icons/` (or `~/.icons/`), so you get
+`~/.local/share/icons/M3E-Purple/`. Then pick the theme:
+
+- **GNOME:** in GNOME Tweaks under **Appearance → Cursor**, or run
+  `gsettings set org.gnome.desktop.interface cursor-theme 'M3E-Purple'`.
+- **Other desktops:** in your desktop's cursor settings, or set `XCURSOR_THEME=M3E-Purple`.
+
+Each theme ships the nominal sizes 24, 32, 48, 64 and 96. The 280-frame loading animation is
+stored at 30 fps on Linux (140 frames, the same 4.666 s cycle) to keep the files a sensible size.
 
 ## Supported roles
 
