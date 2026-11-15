@@ -82,6 +82,22 @@ const closedParts = [
   palm(12.6, 25.4),
 ];
 
+// ---------- Badge glyphs ---------------------------------------------------------------
+const helpGlyph = glyph([
+  { d: `M${P(at([[-2.3, -1.9]])[0])}C${P(at([[-2.3, -4.6]])[0])} ${P(at([[2.4, -4.6]])[0])} ${P(at([[2.4, -1.8]])[0])}` +
+       `C${P(at([[2.4, -0.2]])[0])} ${P(at([[0, 0]])[0])} ${P(at([[0, 1.2]])[0])}`, w: G },
+  { d: circle(BX, BY + 3.5, 1.1) },
+], C.onPrimaryContainer);
+const menuGlyph = glyph([-2.6, 0, 2.6].map((y, i) => ({ d: line(...at([[-3.2, y], [i === 1 ? 1.6 : 3.2, y]])), w: 1.6 })), C.onPrimaryContainer);
+const aliasGlyph = glyph([
+  { d: `M${P(at([[-3.2, 3.4]])[0])}L${P(at([[-3.2, 0.6]])[0])}Q${P(at([[-3.2, -2.2]])[0])} ${P(at([[-0.4, -2.2]])[0])}L${P(at([[3.0, -2.2]])[0])}`, w: G },
+  { d: line(...at([[0.6, -4.6], [3.0, -2.2], [0.6, 0.2]])), w: G },
+], C.onPrimaryContainer);
+const forbiddenBadge = layer([{ d: circle(BX, BY, 6.4) }], C.errorContainer) + glyph([
+  { d: circle(BX, BY, 3.7), w: G },
+  { d: line(...at([[-2.6, 2.6], [2.6, -2.6]])), w: G },
+], C.onErrorContainer);
+
 // ---------- Definitions ----------------------------------------------------------------
 export const cursors = [
   {
@@ -127,6 +143,15 @@ export const cursors = [
     frames: 24, frameMs: 4666 / 24,
     loading: { container: 13, center: [BX - 0.5, BY - 0.5], under: () => arrowWith('') },
   },
+  // Everyday
+  { name: 'text-vertical', label: 'Vertical text I-beam', group: 'Everyday',
+    roles: ['cursor.26'].map(ID), hotspot: [16, 16], svg: () => svg(layer(ibeamParts), { transform: 'rotate(90 16 16)' }) },
+  { name: 'help', label: 'Help', group: 'Everyday',
+    roles: ['cursor.40'].map(ID), hotspot: ARROW_HOT, svg: () => arrowWith(fab() + helpGlyph) },
+  { name: 'context-menu', label: 'Context menu', group: 'Everyday',
+    roles: ['ArrowCtx', 'cursor.24'].map(ID), hotspot: ARROW_HOT, svg: () => arrowWith(fab() + menuGlyph) },
+  { name: 'not-allowed', label: 'Unavailable', group: 'Everyday',
+    roles: ['cursor.3'].map(ID), hotspot: ARROW_HOT, svg: () => arrowWith(forbiddenBadge) },
 ];
 
 export const byName = Object.fromEntries(cursors.map((c) => [c.name, c]));
