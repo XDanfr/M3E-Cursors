@@ -1,12 +1,12 @@
 // Validates rendered assets and every packaged theme.
-//   node tools/validate.mjs
+//   node tools/validate.mjs [variant ...]
 // Checks: frame counts, dimensions, alpha channel and transparent margins, hotspot placement,
 // role coverage against MaCursor's slot list, and the same plist rules MaCursor's
 // CursorThemeWriter.validateThemePlist applies to its own output. Windows .cur / .ani files and
 // Linux Xcursor files and Hyprcursor .hlc archives are parsed back: structure, sizes, hotspots,
 // aliases, frame counts and loop length.
 import { PNG } from 'pngjs';
-import { pixelSizesFor, windowsSizesFor, linuxSizes, VARIANTS } from '../design/geometry.mjs';
+import { pixelSizesFor, windowsSizesFor, linuxSizes, VARIANTS as ALL_VARIANTS } from '../design/geometry.mjs';
 import { WINDOWS, LINUX } from '../design/platforms.mjs';
 import { readFileSync, existsSync, lstatSync, readlinkSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
@@ -16,6 +16,9 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(readFileSync(join(ROOT, 'build/manifest.json')));
+// node tools/validate.mjs [variant ...]: limit the checks to some colours (default: all).
+const only = process.argv.slice(2);
+const VARIANTS = ALL_VARIANTS.filter((v) => !only.length || only.includes(v.id));
 const errors = [], warnings = [];
 const err = (m) => errors.push(m), warn = (m) => warnings.push(m);
 
