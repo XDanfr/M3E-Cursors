@@ -96,7 +96,7 @@ function inf(v, dir) {
 const only = process.argv.slice(2);
 for (const v of VARIANTS.filter((v) => !only.length || only.includes(v.id))) {
   const dir = `M3E ${v.name}`;
-  const out = join(ROOT, 'dist/windows', `M3E-${v.name}`);
+  const out = join(ROOT, 'dist/windows', `M3E-${v.slug}`);
   rmSync(out, { recursive: true, force: true });
   mkdirSync(out, { recursive: true });
   let bytes = 0;
@@ -115,5 +115,5 @@ for (const v of VARIANTS.filter((v) => !only.length || only.includes(v.id))) {
     bytes += data.length;
   }
   writeFileSync(join(out, 'install.inf'), inf(v, dir));
-  console.log(`wrote dist/windows/M3E-${v.name}/  (${WINDOWS.length} cursors, ${(bytes / 1e6).toFixed(1)} MB)`);
+  console.log(`wrote dist/windows/M3E-${v.slug}/  (${WINDOWS.length} cursors, ${(bytes / 1e6).toFixed(1)} MB)`);
 }

@@ -97,6 +97,6 @@ ${reps.map((r) => `\t\t\t\t<data>\n${b64(r)}\t\t\t\t</data>`).join('\n')}
 
 const only = process.argv.slice(2);
 for (const v of VARIANTS.filter((v) => !only.length || only.includes(v.id))) {
-  build({ variant: v.id, themeName: `M3E Cursor ${v.name}`, file: `M3E-${v.name}`, reducedMotion: false });
-  build({ variant: v.id, themeName: `M3E Cursor ${v.name} (Reduced Motion)`, file: `M3E-${v.name}-ReducedMotion`, reducedMotion: true });
+  build({ variant: v.id, themeName: `M3E Cursor ${v.name}`, file: `M3E-${v.slug}`, reducedMotion: false });
+  build({ variant: v.id, themeName: `M3E Cursor ${v.name} (Reduced Motion)`, file: `M3E-${v.slug}-ReducedMotion`, reducedMotion: true });
 }

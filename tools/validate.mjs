@@ -69,7 +69,7 @@ const missing = KNOWN.filter((r) => !seen.has(r) && !INTENTIONALLY_UNSET.has(r))
 if (missing.length) err(`roles with no cursor: ${missing.join(', ')}`);
 
 // ---- packaged themes ----
-for (const name of VARIANTS.flatMap((v) => [`M3E-${v.name}`, `M3E-${v.name}-ReducedMotion`])) {
+for (const name of VARIANTS.flatMap((v) => [`M3E-${v.slug}`, `M3E-${v.slug}-ReducedMotion`])) {
   const file = join(ROOT, 'dist/macos', `${name}.cursor`);
   if (!existsSync(file)) { err(`dist/macos/${name}.cursor not built`); continue; }
   execFileSync('plutil', ['-lint', '-s', file]);
@@ -120,8 +120,8 @@ function riff(buf, at, end, out = []) { // flat list of [id, data] incl. LIST ch
   return out;
 }
 for (const v of VARIANTS) {
-  const dir = join(ROOT, 'dist/windows', `M3E-${v.name}`);
-  if (!existsSync(dir)) { err(`dist/windows/M3E-${v.name} not built`); continue; }
+  const dir = join(ROOT, 'dist/windows', `M3E-${v.slug}`);
+  if (!existsSync(dir)) { err(`dist/windows/M3E-${v.slug} not built`); continue; }
   const inf = readFileSync(join(dir, 'install.inf'), 'utf8');
   for (const [role, name, file] of WINDOWS) {
     const c = byName[name], where = `windows/${v.id}/${file}`;
@@ -141,9 +141,9 @@ for (const v of VARIANTS) {
 
 // ---- Linux ----
 for (const v of VARIANTS) {
-  const dir = join(ROOT, 'dist/linux', `M3E-${v.name}`);
-  if (!existsSync(join(dir, 'index.theme'))) { err(`dist/linux/M3E-${v.name} not built`); continue; }
-  if (!existsSync(join(ROOT, 'dist/linux', `M3E-${v.name}.tar.gz`))) err(`dist/linux/M3E-${v.name}.tar.gz missing`);
+  const dir = join(ROOT, 'dist/linux', `M3E-${v.slug}`);
+  if (!existsSync(join(dir, 'index.theme'))) { err(`dist/linux/M3E-${v.slug} not built`); continue; }
+  if (!existsSync(join(ROOT, 'dist/linux', `M3E-${v.slug}.tar.gz`))) err(`dist/linux/M3E-${v.slug}.tar.gz missing`);
   for (const [name, [file, ...aliases]] of Object.entries(LINUX)) {
     const c = byName[name], where = `linux/${v.id}/${file}`;
     for (const a of aliases) {
@@ -185,7 +185,7 @@ function unzipAll(buf) {
 }
 let hyprShapes = 0;
 for (const v of VARIANTS) {
-  const dir = join(ROOT, 'dist/linux', `M3E-${v.name}`);
+  const dir = join(ROOT, 'dist/linux', `M3E-${v.slug}`);
   if (!existsSync(join(dir, 'manifest.hl'))) { err(`linux/${v.id}: no Hyprcursor manifest.hl`); continue; }
   const man = readFileSync(join(dir, 'manifest.hl'), 'utf8');
   if (!/^cursors_directory = hyprcursors$/m.test(man) || !man.includes(`name = M3E ${v.name}`)) err(`hyprcursor/${v.id}: manifest.hl incomplete`);

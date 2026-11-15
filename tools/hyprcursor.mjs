@@ -67,7 +67,7 @@ const defs = Object.fromEntries(cursors.map((c) => [c.name, c]));
 const framePng = (name, px, i) => readFileSync(join(ROOT, 'build/frames', VARIANT.id, name, String(px), `${String(i).padStart(2, '0')}.png`));
 const f4 = (n) => +n.toFixed(4);
 
-const out = join(ROOT, 'dist/hyprcursor', `M3E-${VARIANT.name}`);
+const out = join(ROOT, 'dist/hyprcursor', `M3E-${VARIANT.slug}`);
 rmSync(out, { recursive: true, force: true });
 mkdirSync(join(out, 'hyprcursors'), { recursive: true });
 writeFileSync(join(out, 'manifest.hl'), [
@@ -111,4 +111,4 @@ for (const [cursor, names] of Object.entries(LINUX)) {
   writeFileSync(join(out, 'hyprcursors', `${names[0]}.hlc`), hlc);
   bytes += hlc.length;
 }
-console.log(`wrote dist/hyprcursor/M3E-${VARIANT.name}/  (${Object.keys(LINUX).length} shapes, ${(bytes / 1e6).toFixed(1)} MB)`);
+console.log(`wrote dist/hyprcursor/M3E-${VARIANT.slug}/  (${Object.keys(LINUX).length} shapes, ${(bytes / 1e6).toFixed(1)} MB)`);

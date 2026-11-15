@@ -43,7 +43,7 @@ export function xcursor(images) { // images: [{ nominal, px, hot, delay, rgba }]
 }
 
 function build(v) {
-  const name = `M3E-${v.name}`;
+  const name = `M3E-${v.slug}`;
   const out = join(ROOT, 'dist/linux', name);
   rmSync(out, { recursive: true, force: true });
   mkdirSync(join(out, 'cursors'), { recursive: true });
