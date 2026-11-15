@@ -12,7 +12,8 @@
     "linux": "node tools/linux.mjs",
     "validate": "node tools/validate.mjs",
     "previews": "node tools/previews.mjs",
-    "build": "npm run render && npm run package && npm run windows && npm run hyprcursor && npm run linux && npm run validate && npm run previews"
+    "build": "npm run render && npm run package && npm run windows && npm run hyprcursor && npm run linux && npm run validate && npm run previews",
+    "gallery": "node tools/package.mjs --gallery && node tools/gallery-shot.mjs"
   },
   "license": "MIT",
   "type": "module",
