@@ -141,6 +141,14 @@ const penParts = [
 const penDetail = glyph([{ d: line(PEN_AT([6.6, -2.4]), PEN_AT([6.6, 2.4])), w: 0.9 }], C.primary30)
   + glyph([{ d: line(PEN_AT([17.6, -2.2]), PEN_AT([17.6, 2.2])), w: 1.6 }], C.primaryContainer);
 const PEN_HOT = cornerApex(PEN_TIP, PEN_TIP_R, 0).map((v) => Math.round(v * 10) / 10);
+// Location pin and person, as FAB badge glyphs on the arrow.
+const pinGlyph = glyph([{ d: `M${P(at([[0, 4.6]])[0])}L${P(at([[-2.9, 0.2]])[0])}` +
+    `A3.4,3.4 0 1,1 ${P(at([[2.9, 0.2]])[0])}Z` }], C.onPrimaryContainer)
+  + glyph([{ d: circle(BX, BY - 1.6, 1.2) }], C.primaryContainer);
+const personGlyph = glyph([
+  { d: circle(BX, BY - 2.3, 1.9) },
+  { d: `M${P(at([[-3.6, 4.2]])[0])}C${P(at([[-3.6, 0.6]])[0])} ${P(at([[3.6, 0.6]])[0])} ${P(at([[3.6, 4.2]])[0])}Z` },
+], C.onPrimaryContainer);
 
 // ---------- Definitions ----------------------------------------------------------------
 export const cursors = [
@@ -229,6 +237,12 @@ export const cursors = [
   // Roles macOS has no slot for: shipped in the Windows and Linux themes only.
   { name: 'pen', label: 'Handwriting', group: 'Other platforms', roles: [], hotspot: PEN_HOT,
     svg: () => svg(layer(penParts) + penDetail) },
+  { name: 'alternate', label: 'Alternate select', group: 'Other platforms', roles: [], hotspot: [16, 5.4],
+    svg: () => arrowsSVG(-90, { heads: 'pos', L: 11 }) },
+  { name: 'location', label: 'Location select', group: 'Other platforms', roles: [], hotspot: ARROW_HOT,
+    svg: () => arrowWith(fab() + pinGlyph) },
+  { name: 'person', label: 'Person select', group: 'Other platforms', roles: [], hotspot: ARROW_HOT,
+    svg: () => arrowWith(fab() + personGlyph) },
 ];
 
 export const byName = Object.fromEntries(cursors.map((c) => [c.name, c]));
