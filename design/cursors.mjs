@@ -130,6 +130,18 @@ const zoom = (plus) => svg(
 const cameraSVG = svg(layer([{ d: rrect(5, 10, 22, 15.5, 5) }, { d: rrect(10.5, 7.4, 7, 5, 1.8) }])
   + glyph([{ d: circle(16, 17.6, 4.7) }], C.primaryContainer) + glyph([{ d: circle(16, 17.6, 2.1) }], C.primary));
 
+// ---------- Roles macOS doesn't have (Windows, Linux) ----------------------------------
+// Pencil for handwriting: tip to the upper left, pointing at the hotspot.
+const PEN_AT = ([x, y]) => [5 + (x - y) * Math.SQRT1_2, 5 + (x + y) * Math.SQRT1_2];
+const PEN_TIP = [[0, 0], [6.6, -3.3], [6.6, 3.3]].map(PEN_AT), PEN_TIP_R = [0.9, 0.5, 0.5];
+const penParts = [
+  { d: roundedPoly(PEN_TIP, PEN_TIP_R) },
+  { d: roundedPoly([[6.6, -3.3], [22, -3.3], [22, 3.3], [6.6, 3.3]].map(PEN_AT), [0.3, 2.6, 2.6, 0.3]) },
+];
+const penDetail = glyph([{ d: line(PEN_AT([6.6, -2.4]), PEN_AT([6.6, 2.4])), w: 0.9 }], C.primary30)
+  + glyph([{ d: line(PEN_AT([17.6, -2.2]), PEN_AT([17.6, 2.2])), w: 1.6 }], C.primaryContainer);
+const PEN_HOT = cornerApex(PEN_TIP, PEN_TIP_R, 0).map((v) => Math.round(v * 10) / 10);
+
 // ---------- Definitions ----------------------------------------------------------------
 export const cursors = [
   {
@@ -214,6 +226,9 @@ export const cursors = [
   ...[['e', 27, 0], ['w', 38, 180], ['n', 31, -90], ['s', 36, 90], ['ne', 29, -45], ['nw', 33, -135], ['se', 35, 45], ['sw', 37, 135]]
     .map(([d, n, deg]) => ({ name: `resize-${d}`, label: `Edge resize ${d.toUpperCase()}`, group: 'Resize',
       roles: [ID(`cursor.${n}`)], hotspot: [16, 16], svg: () => arrowsSVG(deg, { heads: 'pos', L: d.length > 1 ? 9.5 : 9 }) })),
+  // Roles macOS has no slot for: shipped in the Windows and Linux themes only.
+  { name: 'pen', label: 'Handwriting', group: 'Other platforms', roles: [], hotspot: PEN_HOT,
+    svg: () => svg(layer(penParts) + penDetail) },
 ];
 
 export const byName = Object.fromEntries(cursors.map((c) => [c.name, c]));
