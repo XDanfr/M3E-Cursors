@@ -118,6 +118,18 @@ function arrows(deg, { L = 10.5, heads = 'both', bar = false } = {}) {
 }
 const arrowsSVG = (deg, opts) => svg(layer(arrows(deg, opts)));
 
+// ---------- Precision ------------------------------------------------------------------
+const crossParts = [
+  [[16, 4], [16, 12.4]], [[16, 19.6], [16, 28]], [[4, 16], [12.4, 16]], [[19.6, 16], [28, 16]],
+].map((s) => ({ d: line(...s), w: 1.8 })).concat({ d: circle(16, 16, 1.3) });
+const cellParts = [{ d: rrect(13.3, 6.5, 5.4, 19, 2.4) }, { d: rrect(6.5, 13.3, 19, 5.4, 2.4) }];
+const zoom = (plus) => svg(
+  layer([{ d: line([19.4, 19.4], [25.6, 25.6]), w: 4.2 }, { d: circle(13.5, 13.5, 8.6) }])
+  + glyph([{ d: circle(13.5, 13.5, 6.2) }], C.primaryContainer)
+  + glyph([{ d: line([10.2, 13.5], [16.8, 13.5]), w: G }].concat(plus ? [{ d: line([13.5, 10.2], [13.5, 16.8]), w: G }] : []), C.onPrimaryContainer));
+const cameraSVG = svg(layer([{ d: rrect(5, 10, 22, 15.5, 5) }, { d: rrect(10.5, 7.4, 7, 5, 1.8) }])
+  + glyph([{ d: circle(16, 17.6, 4.7) }], C.primaryContainer) + glyph([{ d: circle(16, 17.6, 2.1) }], C.primary));
+
 // ---------- Definitions ----------------------------------------------------------------
 export const cursors = [
   {
@@ -178,6 +190,15 @@ export const cursors = [
   { name: 'move', label: 'Move', group: 'Movement',
     roles: ['Move', 'cursor.39'].map(ID), hotspot: [16, 16],
     svg: () => svg(layer([...arrows(0, { L: 11.5 }), ...arrows(90, { L: 11.5 })]) + glyph([{ d: circle(16, 16, 1.6) }], C.primaryContainer)) },
+  // Precision
+  { name: 'crosshair', label: 'Crosshair', group: 'Precision',
+    roles: ['cursor.7', 'cursor.8', 'cursor.20', 'cursor.10'].map(ID), hotspot: [16, 16], svg: () => svg(layer(crossParts)) },
+  { name: 'cell', label: 'Cell selection', group: 'Precision',
+    roles: ['cursor.41'].map(ID), hotspot: [16, 16],
+    svg: () => svg(layer(cellParts) + glyph([{ d: circle(16, 16, 1.3) }], C.primaryContainer)) },
+  { name: 'zoom-in', label: 'Zoom in', group: 'Precision', roles: ['cursor.42'].map(ID), hotspot: [13.5, 13.5], svg: () => zoom(true) },
+  { name: 'zoom-out', label: 'Zoom out', group: 'Precision', roles: ['cursor.43'].map(ID), hotspot: [13.5, 13.5], svg: () => zoom(false) },
+  { name: 'screenshot-window', label: 'Screenshot window', group: 'Precision', roles: ['cursor.9'].map(ID), hotspot: [16, 16], svg: () => cameraSVG },
 ];
 
 export const byName = Object.fromEntries(cursors.map((c) => [c.name, c]));
