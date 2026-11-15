@@ -7,3 +7,7 @@ build/
 
 # macOS
 .DS_Store
+
+# Windows and Linux builds ship as release assets (npm run windows / npm run linux)
+dist/windows/
+dist/linux/
