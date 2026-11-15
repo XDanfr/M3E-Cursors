@@ -4,6 +4,7 @@
   "description": "Material 3 Expressive cursor themes for macOS (MaCursor), Windows and Linux (KDE, GNOME)",
   "scripts": {
     "palettes": "node tools/palettes.mjs",
+    "new-colour": "node tools/new-colour.mjs",
     "render": "node tools/render.mjs",
     "package": "node tools/package.mjs",
     "windows": "node tools/windows.mjs",
