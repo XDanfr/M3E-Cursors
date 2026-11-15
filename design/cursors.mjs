@@ -2,6 +2,7 @@
 // `tools/render.mjs` exports each definition to an editable SVG in cursors/<name>/ and
 // rasterises it at 32, 64, 160 and 320 px.
 import { T, C, roundedPoly, cornerApex, rrect, circle, line, layer, glyph, svg, spring, lerp, P } from './geometry.mjs';
+import { shape, morph } from './m3-shapes.mjs';
 
 const ID = (s) => (s.startsWith('cursor.') ? 'com.apple.' : 'com.apple.coregraphics.') + s;
 
@@ -13,18 +14,25 @@ const ARROW_R = [T.shape.arrowTipRadius.value, 2.8, 1.4, T.shape.arrowBodyRadius
 const arrowPart = { d: roundedPoly(ARROW_PTS, ARROW_R) };
 const ARROW_HOT = cornerApex(ARROW_PTS, ARROW_R, 0).map((v) => Math.round(v * 10) / 10);
 
-// ---------- Badge (FAB) ----------------------------------------------------------------
+// ---------- Badge -----------------------------------------------------------------------
+// Badges on the arrow are shapes from the Material Shape library, one per meaning, in the
+// tertiary accent (M3E's colour for emphasis). M3E_BADGE_TONE=primary keeps them in the primary
+// container colour instead, for comparison.
 const [BX, BY] = T.shape.badgeCenter.value;
-const BS = T.shape.badgeSize.value, BR = T.shape.badgeCorner.value;
-const fab = (scale = 1, fill = C.primaryContainer) =>
-  layer([{ d: rrect(BX - BS * scale / 2, BY - BS * scale / 2, BS * scale, BS * scale, BR * scale) }], fill);
+const BADGE_SIZE = T.shape.badgeShapeSize.value;
+const TONE = process.env.M3E_BADGE_TONE ?? T.shape.badgeTone.value;
+const BADGE_FILL = TONE === 'primary' ? C.primaryContainer : C.tertiaryContainer;
+const BADGE_ON = TONE === 'primary' ? C.onPrimaryContainer : C.onTertiaryContainer;
+const badge = (name, { rot = 0, scale = 1 } = {}) => layer([{ d: shape(name, BX, BY, BADGE_SIZE * scale, rot) }], BADGE_FILL);
+// One library shape per meaning. Unavailable keeps the universal circle-and-slash.
+const BADGE_SHAPES = { help: '7-sided-cookie', menu: 'bun', alias: 'arch', copy: 'sunny', upload: 'soft-burst', location: 'gem', person: 'flower' };
 const at = (pts) => pts.map(([x, y]) => [BX + x, BY + y]);
 const G = 1.8; // glyph stroke weight
 
 const arrowWith = (badge) => svg(layer([arrowPart]) + badge);
 
 // ---------- Upload / copy morph --------------------------------------------------------
-const SP = T.motion.springSpatial, SE = T.motion.springEffects;
+const SP = T.motion.springSpatial, SE = T.motion.springMorph;
 function uploadFrame(i) {
   const ms = i * T.motion.uploadLoop.frameMs;
   // hold plus 0-600 ms, spring to upload arrow, hold, spring back from 1800 ms
@@ -33,7 +41,7 @@ function uploadFrame(i) {
   else if (ms < 1900) { spatial = spring((ms - 600) / 1000, SP); effect = spring((ms - 600) / 1000, SE); }
   else { spatial = 1 - spring((ms - 1800) / 1000, SP); effect = 1 - spring((ms - 1800) / 1000, SE); }
   const s = Math.min(1, Math.max(0, effect));
-  const scale = 1 + 0.1 * spatial;
+  const scale = 1 + 0.04 * spatial; // small: the morph carries the expression, and the burst must stay inside 32 pt
   const k = (p) => [p[0] * scale, p[1] * scale];
   const stemTop = lerp([0, -3.6], [0, -4.0], s), stemBot = lerp([0, 3.6], [0, 3.9], s);
   const apex = lerp([0, 0], [0, -4.0], s);
@@ -42,7 +50,11 @@ function uploadFrame(i) {
     { d: line(...at([k(stemTop), k(stemBot)])), w: G },
     { d: line(...at([k(l), k(apex), k(r)])), w: G },
   ];
-  return arrowWith(fab(scale) + glyph(g, C.onPrimaryContainer));
+  // The badge morphs from sunny to a soft burst and turns a little, like the loading indicator's
+  // shapes: the morph follows the effects spring, the turn and growth the spatial spring.
+  // The burst's points reach further than the sunny's, so it settles 6% smaller to stay inside 32 pt.
+  const shapeD = morph(BADGE_SHAPES.copy, BADGE_SHAPES.upload, s, BX, BY, BADGE_SIZE * scale * (1 - 0.06 * s), 22.5 * spatial);
+  return arrowWith(layer([{ d: shapeD }], BADGE_FILL) + glyph(g, BADGE_ON));
 }
 
 // ---------- I-beam ---------------------------------------------------------------------
@@ -128,12 +140,12 @@ const helpGlyph = glyph([
   { d: `M${P(at([[-2.3, -1.9]])[0])}C${P(at([[-2.3, -4.6]])[0])} ${P(at([[2.4, -4.6]])[0])} ${P(at([[2.4, -1.8]])[0])}` +
        `C${P(at([[2.4, -0.2]])[0])} ${P(at([[0, 0]])[0])} ${P(at([[0, 1.2]])[0])}`, w: G },
   { d: circle(BX, BY + 3.5, 1.1) },
-], C.onPrimaryContainer);
-const menuGlyph = glyph([-2.6, 0, 2.6].map((y, i) => ({ d: line(...at([[-3.2, y], [i === 1 ? 1.6 : 3.2, y]])), w: 1.6 })), C.onPrimaryContainer);
+], BADGE_ON);
+const menuGlyph = glyph([-2.6, 0, 2.6].map((y, i) => ({ d: line(...at([[-3.2, y], [i === 1 ? 1.6 : 3.2, y]])), w: 1.6 })), BADGE_ON);
 const aliasGlyph = glyph([
   { d: `M${P(at([[-3.2, 3.4]])[0])}L${P(at([[-3.2, 0.6]])[0])}Q${P(at([[-3.2, -2.2]])[0])} ${P(at([[-0.4, -2.2]])[0])}L${P(at([[3.0, -2.2]])[0])}`, w: G },
   { d: line(...at([[0.6, -4.6], [3.0, -2.2], [0.6, 0.2]])), w: G },
-], C.onPrimaryContainer);
+], BADGE_ON);
 const forbiddenBadge = layer([{ d: circle(BX, BY, 6.4) }], C.errorContainer) + glyph([
   { d: circle(BX, BY, 3.7), w: G },
   { d: line(...at([[-2.6, 2.6], [2.6, -2.6]])), w: G },
@@ -162,12 +174,12 @@ const arrowsSVG = (deg, opts) => svg(layer(arrows(deg, opts)));
 // ---------- Precision ------------------------------------------------------------------
 const crossParts = [
   [[16, 4], [16, 12.4]], [[16, 19.6], [16, 28]], [[4, 16], [12.4, 16]], [[19.6, 16], [28, 16]],
-].map((s) => ({ d: line(...s), w: 1.8 })).concat({ d: circle(16, 16, 1.3) });
-const cellParts = [{ d: rrect(13.3, 6.5, 5.4, 19, 2.4) }, { d: rrect(6.5, 13.3, 19, 5.4, 2.4) }];
+].map((s) => ({ d: line(...s), w: 1.8 }));
 const zoom = (plus) => svg(
-  layer([{ d: line([19.4, 19.4], [25.6, 25.6]), w: 4.2 }, { d: circle(13.5, 13.5, 8.6) }])
+  layer([{ d: line([19.4, 19.4], [25.6, 25.6]), w: 4.2 }, { d: shape('12-sided-cookie', 13.5, 13.5, 18.4) }])
   + glyph([{ d: circle(13.5, 13.5, 6.2) }], C.primaryContainer)
   + glyph([{ d: line([10.2, 13.5], [16.8, 13.5]), w: G }].concat(plus ? [{ d: line([13.5, 10.2], [13.5, 16.8]), w: G }] : []), C.onPrimaryContainer));
+const cellParts = [{ d: rrect(13.3, 6.5, 5.4, 19, 2.4) }, { d: rrect(6.5, 13.3, 19, 5.4, 2.4) }];
 const cameraSVG = svg(layer([{ d: rrect(5, 10, 22, 15.5, 5) }, { d: rrect(10.5, 7.4, 7, 5, 1.8) }])
   + glyph([{ d: circle(16, 17.6, 4.7) }], C.primaryContainer) + glyph([{ d: circle(16, 17.6, 2.1) }], C.primary));
 
@@ -184,12 +196,17 @@ const penDetail = glyph([{ d: line(PEN_AT([6.6, -2.4]), PEN_AT([6.6, 2.4])), w: 
 const PEN_HOT = cornerApex(PEN_TIP, PEN_TIP_R, 0).map((v) => Math.round(v * 10) / 10);
 // Location pin and person, as FAB badge glyphs on the arrow.
 const pinGlyph = glyph([{ d: `M${P(at([[0, 4.6]])[0])}L${P(at([[-2.9, 0.2]])[0])}` +
-    `A3.4,3.4 0 1,1 ${P(at([[2.9, 0.2]])[0])}Z` }], C.onPrimaryContainer)
-  + glyph([{ d: circle(BX, BY - 1.6, 1.2) }], C.primaryContainer);
+    `A3.4,3.4 0 1,1 ${P(at([[2.9, 0.2]])[0])}Z` }], BADGE_ON)
+  + glyph([{ d: circle(BX, BY - 1.6, 1.2) }], BADGE_FILL);
 const personGlyph = glyph([
   { d: circle(BX, BY - 2.3, 1.9) },
   { d: `M${P(at([[-3.6, 4.2]])[0])}C${P(at([[-3.6, 0.6]])[0])} ${P(at([[3.6, 0.6]])[0])} ${P(at([[3.6, 4.2]])[0])}Z` },
-], C.onPrimaryContainer);
+], BADGE_ON);
+
+// For review sheets: any library shape behind any badge glyph.
+export const GLYPHS = { help: () => helpGlyph, menu: () => menuGlyph, alias: () => aliasGlyph, pin: () => pinGlyph, person: () => personGlyph,
+  plus: () => glyph([{ d: line(...at([[0, -3.6], [0, 3.6]])), w: G }, { d: line(...at([[-3.6, 0], [3.6, 0]])), w: G }], BADGE_ON) };
+export const badgeArrow = (name, g, rot = 0) => arrowWith(badge(name, { rot }) + GLYPHS[g]());
 
 // ---------- Definitions ----------------------------------------------------------------
 export const cursors = [
@@ -240,23 +257,24 @@ export const cursors = [
   { name: 'text-vertical', label: 'Vertical text I-beam', group: 'Everyday',
     roles: ['cursor.26'].map(ID), hotspot: [16, 16], svg: () => svg(layer(ibeamParts), { transform: 'rotate(90 16 16)' }) },
   { name: 'help', label: 'Help', group: 'Everyday',
-    roles: ['cursor.40'].map(ID), hotspot: ARROW_HOT, svg: () => arrowWith(fab() + helpGlyph) },
+    roles: ['cursor.40'].map(ID), hotspot: ARROW_HOT, svg: () => arrowWith(badge(BADGE_SHAPES.help) + helpGlyph) },
   { name: 'context-menu', label: 'Context menu', group: 'Everyday',
-    roles: ['ArrowCtx', 'cursor.24'].map(ID), hotspot: ARROW_HOT, svg: () => arrowWith(fab() + menuGlyph) },
+    roles: ['ArrowCtx', 'cursor.24'].map(ID), hotspot: ARROW_HOT, svg: () => arrowWith(badge(BADGE_SHAPES.menu) + menuGlyph) },
   { name: 'not-allowed', label: 'Unavailable', group: 'Everyday',
     roles: ['cursor.3'].map(ID), hotspot: ARROW_HOT, svg: () => arrowWith(forbiddenBadge) },
   // Movement
   { name: 'alias', label: 'Alias / link drop', group: 'Movement',
-    roles: ['Alias', 'cursor.2'].map(ID), hotspot: ARROW_HOT, svg: () => arrowWith(fab() + aliasGlyph) },
+    roles: ['Alias', 'cursor.2'].map(ID), hotspot: ARROW_HOT, svg: () => arrowWith(badge(BADGE_SHAPES.alias) + aliasGlyph) },
   { name: 'move', label: 'Move', group: 'Movement',
     roles: ['Move', 'cursor.39'].map(ID), hotspot: [16, 16],
-    svg: () => svg(layer([...arrows(0, { L: 11.5 }), ...arrows(90, { L: 11.5 })]) + glyph([{ d: circle(16, 16, 1.6) }], C.primaryContainer)) },
+    svg: () => svg(layer([...arrows(0, { L: 11.5 }), ...arrows(90, { L: 11.5 })]) + layer([{ d: shape('4-sided-cookie', 16, 16, 5.6, 45) }], BADGE_FILL)) },
   // Precision
   { name: 'crosshair', label: 'Crosshair', group: 'Precision',
-    roles: ['cursor.7', 'cursor.8', 'cursor.20', 'cursor.10'].map(ID), hotspot: [16, 16], svg: () => svg(layer(crossParts)) },
+    roles: ['cursor.7', 'cursor.8', 'cursor.20', 'cursor.10'].map(ID), hotspot: [16, 16],
+    svg: () => svg(layer(crossParts) + layer([{ d: shape('4-sided-cookie', 16, 16, 4.4, 45) }], BADGE_FILL)) },
   { name: 'cell', label: 'Cell selection', group: 'Precision',
     roles: ['cursor.41'].map(ID), hotspot: [16, 16],
-    svg: () => svg(layer(cellParts) + glyph([{ d: circle(16, 16, 1.3) }], C.primaryContainer)) },
+    svg: () => svg(layer(cellParts) + layer([{ d: shape('4-sided-cookie', 16, 16, 4.6, 45) }], BADGE_FILL)) },
   { name: 'zoom-in', label: 'Zoom in', group: 'Precision', roles: ['cursor.42'].map(ID), hotspot: [13.5, 13.5], svg: () => zoom(true) },
   { name: 'zoom-out', label: 'Zoom out', group: 'Precision', roles: ['cursor.43'].map(ID), hotspot: [13.5, 13.5], svg: () => zoom(false) },
   { name: 'screenshot-window', label: 'Screenshot window', group: 'Precision', roles: ['cursor.9'].map(ID), hotspot: [16, 16], svg: () => cameraSVG },
@@ -281,9 +299,9 @@ export const cursors = [
   { name: 'alternate', label: 'Alternate select', group: 'Other platforms', roles: [], hotspot: [16, 5.4],
     svg: () => arrowsSVG(-90, { heads: 'pos', L: 11 }) },
   { name: 'location', label: 'Location select', group: 'Other platforms', roles: [], hotspot: ARROW_HOT,
-    svg: () => arrowWith(fab() + pinGlyph) },
+    svg: () => arrowWith(badge(BADGE_SHAPES.location) + pinGlyph) },
   { name: 'person', label: 'Person select', group: 'Other platforms', roles: [], hotspot: ARROW_HOT,
-    svg: () => arrowWith(fab() + personGlyph) },
+    svg: () => arrowWith(badge(BADGE_SHAPES.person) + personGlyph) },
 ];
 
 export const byName = Object.fromEntries(cursors.map((c) => [c.name, c]));
