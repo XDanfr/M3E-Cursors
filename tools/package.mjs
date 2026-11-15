@@ -2,14 +2,15 @@
 //
 // The format follows MaCursor's own writer, MaCursor/SwiftUI/Services/CursorThemeWriter.swift:
 //   root:   ThemeName, ThemeVersion, Creator, HiDPI, Identifier, UUID (uppercase), Cursors
-//   cursor: FrameCount (24 or fewer for MaCursor's own writer; longer strips import and play
-//           in MaCursor's preview, and its engine resamples them to 24 when it applies the theme), FrameDuration (s per frame), HotSpotX/Y (pt),
-//           PointsWide/High (32), Representations = PNG data, one per pixel size (32/64/160/320),
-//           each a vertical strip of FrameCount frames with frame 0 at the top.
+//   cursor: FrameCount, FrameDuration (s per frame), HotSpotX/Y (pt), PointsWide/High (32),
+//           Representations = PNG data, one per pixel size (32/64/160, plus 320 for short
+//           animations), each a vertical strip of FrameCount frames with frame 0 at the top.
+//           MaCursor's own writer stops at 24 frames. Longer strips import and play in its
+//           preview, and its engine resamples them to 24 when it applies the theme.
 //
-//   node tools/package.mjs            -> dist/M3E-Purple.cursor + dist/M3E-Purple-ReducedMotion.cursor
+//   node tools/package.mjs [variant ...]   -> dist/M3E-<Variant>.cursor + dist/M3E-<Variant>-ReducedMotion.cursor
 import { PNG } from 'pngjs';
-import { pixelSizesFor } from '../design/geometry.mjs';
+import { pixelSizesFor, VARIANTS } from '../design/geometry.mjs';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join, dirname } from 'node:path';
@@ -19,12 +20,13 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(readFileSync(join(ROOT, 'build/manifest.json')));
 const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json')));
 
-const framePath = (name, px, i) => join(ROOT, 'build/frames', name, String(px), `${String(i).padStart(2, '0')}.png`);
+const framePath = (variant, name, px, i) =>
+  join(ROOT, 'build/frames', variant, name, String(px), `${String(i).padStart(2, '0')}.png`);
 
-function strip(name, px, frames) {
+function strip(variant, name, px, frames) {
   const out = new PNG({ width: px, height: px * frames });
   for (let i = 0; i < frames; i++) {
-    const f = PNG.sync.read(readFileSync(framePath(name, px, i)));
+    const f = PNG.sync.read(readFileSync(framePath(variant, name, px, i)));
     if (f.width !== px || f.height !== px) throw new Error(`${name} ${px}px frame ${i} is ${f.width}x${f.height}`);
     f.data.copy(out.data, i * px * px * 4);
   }
@@ -47,13 +49,13 @@ const b64 = (buf) => buf.toString('base64').replace(/.{1,68}/g, '\t\t\t\t$&\n');
 // CursorThemeWriter.sanitizeIdentifier does) and renames anything else on import.
 const sanitize = (name) => name.trim().replace(/[ /:]/g, '');
 
-function build({ themeName, file: fileName, reducedMotion }) {
+function build({ variant, themeName, file: fileName, reducedMotion }) {
   const identifier = sanitize(themeName);
   const entries = [];
   for (const c of manifest) {
     const frames = reducedMotion ? 1 : c.frames;
     const duration = frames > 1 ? c.frameDuration : 1;
-    const reps = pixelSizesFor(c.frames).map((px) => strip(c.name, px, frames));
+    const reps = pixelSizesFor(c.frames).map((px) => strip(variant, c.name, px, frames));
     for (const role of c.roles) entries.push([role, `
 \t\t<key>${role}</key>
 \t\t<dict>
@@ -92,5 +94,8 @@ ${reps.map((r) => `\t\t\t\t<data>\n${b64(r)}\t\t\t\t</data>`).join('\n')}
   console.log(`wrote ${file.slice(ROOT.length + 1)}  (${entries.length} roles, ${(xml.length / 1e6).toFixed(2)} MB)`);
 }
 
-build({ themeName: 'M3E Cursor Purple', file: 'M3E-Purple', reducedMotion: false });
-build({ themeName: 'M3E Cursor Purple (Reduced Motion)', file: 'M3E-Purple-ReducedMotion', reducedMotion: true });
+const only = process.argv.slice(2);
+for (const v of VARIANTS.filter((v) => !only.length || only.includes(v.id))) {
+  build({ variant: v.id, themeName: `M3E Cursor ${v.name}`, file: `M3E-${v.name}`, reducedMotion: false });
+  build({ variant: v.id, themeName: `M3E Cursor ${v.name} (Reduced Motion)`, file: `M3E-${v.name}-ReducedMotion`, reducedMotion: true });
+}

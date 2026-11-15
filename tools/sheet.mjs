@@ -1,6 +1,6 @@
 // Inspection contact sheet: each cursor at true 1x and 2x pixels (magnified without smoothing)
 // and at 10x, over light, mid and dark backgrounds, with the hotspot marked.
-//   node tools/sheet.mjs out.png [frame] [name ...]
+//   [M3E_VARIANT=blue] node tools/sheet.mjs out.png [frame] [name ...]
 import { chromium } from 'playwright';
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -12,7 +12,7 @@ const [out, frameArg = '0', ...names] = process.argv.slice(2);
 const list = cursors.filter((c) => !names.length || names.includes(c.name));
 const img = (c, px) => {
   const f = String(Math.min(+frameArg, (c.frames ?? 1) - 1)).padStart(2, '0');
-  return 'data:image/png;base64,' + readFileSync(join(ROOT, 'build/frames', c.name, String(px), `${f}.png`)).toString('base64');
+  return 'data:image/png;base64,' + readFileSync(join(ROOT, 'build/frames', process.env.M3E_VARIANT || 'purple', c.name, String(px), `${f}.png`)).toString('base64');
 };
 const bgs = ['#ffffff', '#8a8a8a', '#1c1b1f', 'linear-gradient(135deg,#f4b400,#0f9d58 50%,#4285f4)'];
 const rows = list.map((c) => `<tr><td class=l>${c.name}</td>${bgs.map((bg) => `<td style="background:${bg}">

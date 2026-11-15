@@ -1,4 +1,5 @@
-// Builds previews/cursor-gallery.svg (+ .png) and previews/animation-preview/*.gif.
+// Builds previews/cursor-gallery.svg (+ .png), previews/variants.png and previews/animation-preview/*.gif.
+// The gallery and GIFs show the purple theme; variants.png compares every colour variant.
 //   node tools/previews.mjs
 // GIFs are flattened onto opaque light and dark backgrounds: GIF only has 1-bit transparency,
 // which would fringe the anti-aliased rim.
@@ -7,12 +8,14 @@ import { PNG } from 'pngjs';
 import gifenc from 'gifenc';
 import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { join, dirname } from 'node:path';
+import { VARIANTS } from '../design/geometry.mjs';
 import { fileURLToPath } from 'node:url';
 
 const { GIFEncoder, quantize, applyPalette } = gifenc;
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(readFileSync(join(ROOT, 'build/manifest.json')));
-const frame = (name, px, i) => readFileSync(join(ROOT, 'build/frames', name, String(px), `${String(i).padStart(2, '0')}.png`));
+const frame = (name, px, i, variant = 'purple') =>
+  readFileSync(join(ROOT, 'build/frames', variant, name, String(px), `${String(i).padStart(2, '0')}.png`));
 const OUT = join(ROOT, 'previews');
 rmSync(join(OUT, 'animation-preview'), { recursive: true, force: true });
 mkdirSync(join(OUT, 'animation-preview'), { recursive: true });
@@ -50,6 +53,18 @@ for (const n of ['cursor-gallery', 'cursor-gallery-dark']) {
   await p.goto('file://' + join(OUT, `${n}.svg`));
   await p.screenshot({ path: join(OUT, `${n}.png`) });
 }
+
+// ---- variants overview: a row per variant, a few representative cursors, light and dark ----
+const SAMPLE = [['arrow', 0], ['pointer', 0], ['text', 0], ['grab', 0], ['help', 0], ['upload', 12], ['wait', 120], ['resize-nwse', 0]];
+const half = (bg, fg) => `<div style="background:${bg};color:${fg};padding:20px 24px">${VARIANTS.map((v) => `
+  <div style="display:flex;align-items:center;gap:14px;height:76px">
+    <div style="width:92px;font:600 14px -apple-system,Roboto,sans-serif">${v.name}</div>
+    ${SAMPLE.map(([n, f]) => `<img width="64" height="64" src="data:image/png;base64,${frame(n, 160, f, v.id).toString('base64')}">`).join('')}
+  </div>`).join('')}</div>`;
+await p.goto('about:blank');
+await p.setViewportSize({ width: 1540, height: VARIANTS.length * 76 + 40 });
+await p.setContent(`<body style="margin:0;display:flex">${half('#FEF7FF', '#1D1B20')}${half('#141218', '#E6E0E9')}</body>`);
+await p.screenshot({ path: join(OUT, 'variants.png') });
 await b.close();
 
 // ---- animation GIFs ----
