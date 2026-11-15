@@ -24,7 +24,8 @@ The busy cursor is the official M3E **contained loading indicator**, rendered fr
 
 1. Install MaCursor (macOS 13 or later; tested here on macOS 26.7.1 with MaCursor 2.7.5).
 2. Double-click `dist/M3E-Purple.cursor`, or drag it onto MaCursor's library window, or use
-   **File → Import Theme…**.
+   **File → Import Theme…**. If MaCursor is running only in the menu bar, open its library
+   window first. A double-clicked theme can be dropped silently when no window is open.
 3. Select **M3E Cursor Purple** and click **Apply**.
 
 There's also `dist/M3E-Purple-ReducedMotion.cursor`. It's the same theme, but every animated
