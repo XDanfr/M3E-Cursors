@@ -1,6 +1,6 @@
 # M3E Cursors
 
-Material 3 Expressive cursor themes in eight colours, for **macOS** (via
+Material 3 Expressive cursor themes in ten colours, for **macOS** (via
 [MaCursor](https://github.com/writronic/MaCursor)), **Windows** and **Linux** (KDE Plasma, GNOME
 and other desktops that use Xcursor themes).
 
@@ -30,7 +30,7 @@ Get the build for your platform from the
 |---|---|---|
 | macOS (MaCursor) | `M3E-Cursors-macOS.zip` | `M3E-<Colour>.cursor` and `M3E-<Colour>-ReducedMotion.cursor` for every colour. Also in [`dist/macos`](dist/macos) |
 | Windows 10 / 11 | `M3E-Cursors-Windows.zip` | One folder per colour with `.cur` / `.ani` files and `install.inf` |
-| Linux (KDE, GNOME, …) | `M3E-Cursors-Linux.tar.gz` | Every colour as an Xcursor theme. Single-colour archives (`M3E-<Colour>.tar.gz`) are attached too, ready for the KDE Store / Pling |
+| Linux (KDE, GNOME, …) | `M3E-Cursors-Linux.tar.gz` | Every colour as an Xcursor and Hyprcursor theme. Single-colour archives (`M3E-<Colour>.tar.gz`, e.g. `M3E-LightBlue.tar.gz`) are attached too, ready for the KDE Store / Pling |
 
 ## Colour variants
 
@@ -46,10 +46,18 @@ Get the build for your platform from the
 | Red | `#B4271F` | `#FFDAD5` | `#410001` |
 | Pink | `#984061` | `#FFD9E2` | `#3E001D` |
 | Graphite | `#605D64` | `#E6E0E9` | `#1D1B20` |
+| Light Blue | `#96CCFF` | `#004A75` | `#CEE5FF` |
+| Pale Blue | `#CEE5FF` | `#00639A` | `#E8F2FF` |
 
 Each variant takes tones 40, 30, 90 and 10 from the M3 tonal palette of its seed colour, using
 Google's [material-color-utilities](https://github.com/material-foundation/material-color-utilities).
 Purple keeps the M3 baseline values. Graphite is the purple hue at very low chroma.
+
+**Light Blue** and **Pale Blue** are light cursors. They use M3's dark-scheme roles instead: a
+light body (tone 80 or 90), a dark FAB badge (tone 30 or 40) with a light glyph, and a reversed
+edge, with a dark rim inside and a white hairline outside, so they stay visible on white. The
+loading indicator flips with them: a dark container with a light morphing shape, the component's
+own dark-theme look.
 
 ## Install
 
