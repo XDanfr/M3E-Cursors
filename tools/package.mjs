@@ -2,7 +2,8 @@
 //
 // The format follows MaCursor's own writer, MaCursor/SwiftUI/Services/CursorThemeWriter.swift:
 //   root:   ThemeName, ThemeVersion, Creator, HiDPI, Identifier, UUID (uppercase), Cursors
-//   cursor: FrameCount (1...24), FrameDuration (s per frame), HotSpotX/Y (pt),
+//   cursor: FrameCount (24 or fewer for MaCursor's own writer; longer strips import and play
+//           in MaCursor's preview, and its engine resamples them to 24 when it applies the theme), FrameDuration (s per frame), HotSpotX/Y (pt),
 //           PointsWide/High (32), Representations = PNG data, one per pixel size (32/64/160/320),
 //           each a vertical strip of FrameCount frames with frame 0 at the top.
 //

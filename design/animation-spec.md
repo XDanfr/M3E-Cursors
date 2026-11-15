@@ -7,7 +7,7 @@ These limits come from MaCursor's source (`CursorEngine/MACCursorDefinitions.swi
 
 | Constraint | Value | Consequence |
 |---|---|---|
-| Frames per cursor | 1 – 24 (`maxFrameCount`) | Longer animations get resampled down to 24 frames |
+| Frames per cursor | Any number in the `.cursor` file. 24 when applied (`maxFrameCount`) | MaCursor imports and previews long strips at full rate. Its engine (`MACCursorActions.prepareImages`) resamples anything over 24 frames to 24 when it applies the theme |
 | Frame timing | One `FrameDuration` for every frame | You can't hold one frame longer than another, except by repeating it |
 | Playback | Loops forever while the cursor is visible | Nothing plays once, and nothing reacts to state changes |
 | Transitions | macOS swaps cursor images instantly | You can't animate *between* two cursors (open hand to closed hand) |
@@ -31,18 +31,20 @@ What the component does, as read from its source:
 
 How the cursor renders it:
 
-- The component is paused, then each frame is placed with `Animation.currentTime = i × 4666 / 24`.
-- Each frame is rendered as vector at 1×, 2×, 5× and 10×.
+- The component is paused, then each frame is placed with `Animation.currentTime = i × 4666 / 280`.
+- Each frame is rendered as vector at 1×, 2× and 5×. A 10× strip of 280 frames would be about 115 MB once decoded.
 - **Sizes:** the standalone Wait cursor uses a 24 pt container. The arrow badge (`cursor.4`) uses 13 pt.
   The active size is container × 38/48 in both cases, so the official proportion holds.
 - **Colours:** container `#EADDFF`, active shape `#21005D`. Both are set through the component's own
   CSS custom properties.
 - **Edge treatment:** the only addition is the white rim and dark hairline that every cursor in the
   theme gets. They keep the pale container visible on white. The animation itself is unchanged.
-- **Timing:** 24 frames × 194.4 ms = 4.666 s, the same as the component.
-- **Limitation:** 24 frames over 4.666 s is about 5 fps. The browser plays the component at 60 fps.
-  Faster playback would break the official timing, so the cursor keeps the official timing and
-  accepts the coarser motion.
+- **Timing:** 280 frames × 16.66 ms = 4.666 s, which is the component's own cycle at 60 fps. The MD3E
+  Cursors gallery theme uses the same layout.
+- **Frame rate:** MaCursor's editor preview plays all 280 frames. According to MaCursor's source, its
+  engine samples 24 of them evenly when it applies the theme system-wide, about 5 fps. That's the
+  same as for every other theme with more than 24 frames.
+- The cycle isn't shortened or sped up, so the official timing holds either way.
 - **Reduced motion:** the reduced-motion theme holds frame 0 (soft-burst), as the component does.
 
 ## 2. Upload / copy drop (Copy, `cursor.5`)
