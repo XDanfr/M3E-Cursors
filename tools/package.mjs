@@ -42,7 +42,12 @@ const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, 
 const real = (n) => `<real>${Number.isInteger(n) ? n : +n.toFixed(5)}</real>`;
 const b64 = (buf) => buf.toString('base64').replace(/.{1,68}/g, '\t\t\t\t$&\n');
 
-function build({ themeName, identifier, reducedMotion }) {
+// MaCursor derives a theme's Identifier from its name (spaces, '/' and ':' removed, as
+// CursorThemeWriter.sanitizeIdentifier does) and renames anything else on import.
+const sanitize = (name) => name.trim().replace(/[ /:]/g, '');
+
+function build({ themeName, file: fileName, reducedMotion }) {
+  const identifier = sanitize(themeName);
   const entries = [];
   for (const c of manifest) {
     const frames = reducedMotion ? 1 : c.frames;
@@ -81,10 +86,10 @@ ${reps.map((r) => `\t\t\t\t<data>\n${b64(r)}\t\t\t\t</data>`).join('\n')}
 </plist>
 `;
   mkdirSync(join(ROOT, 'dist'), { recursive: true });
-  const file = join(ROOT, 'dist', `${identifier.replace('M3EPurple', 'M3E-Purple').replace('ReducedMotion', '-ReducedMotion')}.cursor`);
+  const file = join(ROOT, 'dist', `${fileName}.cursor`);
   writeFileSync(file, xml);
   console.log(`wrote ${file.slice(ROOT.length + 1)}  (${entries.length} roles, ${(xml.length / 1e6).toFixed(2)} MB)`);
 }
 
-build({ themeName: 'M3E Cursor Purple', identifier: 'M3EPurple', reducedMotion: false });
-build({ themeName: 'M3E Cursor Purple (Reduced Motion)', identifier: 'M3EPurpleReducedMotion', reducedMotion: true });
+build({ themeName: 'M3E Cursor Purple', file: 'M3E-Purple', reducedMotion: false });
+build({ themeName: 'M3E Cursor Purple (Reduced Motion)', file: 'M3E-Purple-ReducedMotion', reducedMotion: true });
