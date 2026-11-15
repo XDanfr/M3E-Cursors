@@ -18,7 +18,7 @@ The busy cursor is the official M3E **contained loading indicator**, rendered fr
 | | |
 |---|---|
 | ![Loading](previews/animation-preview/wait-light.gif) | ![Upload](previews/animation-preview/upload-light.gif) |
-| Wait: official contained loading indicator, 4.666 s loop | Copy / upload drop: FAB plus springs into an upload arrow |
+| Wait: official contained loading indicator, 4.666 s loop at 60 fps (GIF shown at 20 fps) | Copy / upload drop: FAB plus springs into an upload arrow |
 
 ## Install
 
@@ -33,8 +33,8 @@ cursor holds its first frame. Cursors can't read the system's *Reduce motion* se
 motion has to be a separate theme. To switch automatically, use MaCursor's per-app or scheduled
 themes.
 
-To change the size, use MaCursor → Settings → Cursor Control → **Cursor Scale**. Every slot ships
-at 32, 64, 160 and 320 px, so the cursors stay sharp up to 10× on Retina.
+To change the size, use MaCursor → Settings → Cursor Control → **Cursor Scale**. Every slot ships at 32, 64 and 160 px, and static cursors also at 320 px. They stay
+sharp up to 5× on Retina, and static cursors up to 10×.
 
 ## Supported roles
 
@@ -85,11 +85,11 @@ IBeam into them. This theme also writes them explicitly, so they match even if y
 
 ## Known limitations
 
-- **24-frame cap.** MaCursor and the CoreGraphics cursor registry accept at most 24 frames per
-  cursor, and every frame lasts the same time. The loading indicator keeps its official 4.666 s
-  cycle and seven-shape sequence, which works out to about 5 fps. In a browser the same component
-  runs at 60 fps. Speeding the cycle up would break the official timing, so the theme keeps the
-  timing and accepts the coarser motion.
+- **Frame rate of the busy cursors.** Both busy cursors store the official indicator at 60 fps:
+  280 frames per 4.666 s cycle, the same layout as the MD3E Cursors gallery theme. MaCursor's
+  preview plays all of them. According to MaCursor's source, its engine samples 24 frames when it
+  applies a theme (a CoreGraphics cursor limit), so system-wide playback may be coarser. The cycle
+  length and shape sequence stay official either way.
 - **No transitions between cursors.** macOS swaps cursor images instantly, and animated cursors
   always loop. So the grab → grabbing change is a static pair drawn on the same palm grid. The
   upload cursor's "accepted ✓" stage isn't included either, because macOS has no "drop accepted"
@@ -130,7 +130,7 @@ npm run build      # render → package → validate → previews
 
 | Script | What it does |
 |---|---|
-| `npm run render` | Exports the SVGs and renders every cursor at 32/64/160/320 px. Vector cursors are drawn at each device scale, so nothing is a bitmap upscale. Loading cursors are frames of the live `<m3e-loading-indicator>`, paused and seeked with the Web Animations API. |
+| `npm run render` | Exports the SVGs and renders every cursor at 32/64/160/320 px (long animations stop at 160 px). Vector cursors are drawn at each device scale, so nothing is a bitmap upscale. Loading cursors are frames of the live `<m3e-loading-indicator>`, paused and seeked with the Web Animations API. |
 | `npm run package` | Writes the two `.cursor` themes in MaCursor's native plist format, the same format as MaCursor's own `CursorThemeWriter.swift`. |
 | `npm run validate` | Checks frame counts and sizes, alpha and clipping, hotspot placement, role coverage, and the plist rules MaCursor applies to its own themes. |
 | `npm run previews` | Writes the gallery and animation GIFs. |
