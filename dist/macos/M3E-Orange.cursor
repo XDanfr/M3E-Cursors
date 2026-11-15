@@ -228051,7 +228051,7 @@
 	<key>HiDPI</key><true/>
 	<key>Identifier</key><string>M3ECursorOrange</string>
 	<key>ThemeName</key><string>M3E Cursor Orange</string>
-	<key>ThemeVersion</key><real>1</real>
+	<key>ThemeVersion</key><real>1.2</real>
 	<key>UUID</key><string>C09B6DFA-B8C3-52A3-9A6B-EEA419A0212E</string>
 </dict>
 </plist>

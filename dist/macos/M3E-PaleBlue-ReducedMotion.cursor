@@ -21215,7 +21215,7 @@
 	<key>HiDPI</key><true/>
 	<key>Identifier</key><string>M3ECursorPaleBlue(ReducedMotion)</string>
 	<key>ThemeName</key><string>M3E Cursor Pale Blue (Reduced Motion)</string>
-	<key>ThemeVersion</key><real>1</real>
+	<key>ThemeVersion</key><real>1.2</real>
 	<key>UUID</key><string>FCC87B67-EE1B-5D62-8E5C-3FEE1386176A</string>
 </dict>
 </plist>

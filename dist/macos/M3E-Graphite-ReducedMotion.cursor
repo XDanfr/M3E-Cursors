@@ -23105,7 +23105,7 @@
 	<key>HiDPI</key><true/>
 	<key>Identifier</key><string>M3ECursorGraphite(ReducedMotion)</string>
 	<key>ThemeName</key><string>M3E Cursor Graphite (Reduced Motion)</string>
-	<key>ThemeVersion</key><real>1</real>
+	<key>ThemeVersion</key><real>1.2</real>
 	<key>UUID</key><string>C8309CBE-E8D0-5A1F-9BE0-A0790B6F9EE9</string>
 </dict>
 </plist>

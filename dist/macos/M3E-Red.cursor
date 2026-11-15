@@ -222804,7 +222804,7 @@
 	<key>HiDPI</key><true/>
 	<key>Identifier</key><string>M3ECursorRed</string>
 	<key>ThemeName</key><string>M3E Cursor Red</string>
-	<key>ThemeVersion</key><real>1</real>
+	<key>ThemeVersion</key><real>1.2</real>
 	<key>UUID</key><string>338EC6A6-2B1F-5AEB-A1BF-7EDEBA798614</string>
 </dict>
 </plist>

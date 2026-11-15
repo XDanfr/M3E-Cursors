@@ -227578,7 +227578,7 @@
 	<key>HiDPI</key><true/>
 	<key>Identifier</key><string>M3ECursorPink</string>
 	<key>ThemeName</key><string>M3E Cursor Pink</string>
-	<key>ThemeVersion</key><real>1</real>
+	<key>ThemeVersion</key><real>1.2</real>
 	<key>UUID</key><string>ABAC09F2-C054-5178-97DE-42E11BC3977C</string>
 </dict>
 </plist>

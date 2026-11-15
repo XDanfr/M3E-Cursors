@@ -22481,7 +22481,7 @@
 	<key>HiDPI</key><true/>
 	<key>Identifier</key><string>M3ECursorOrange(ReducedMotion)</string>
 	<key>ThemeName</key><string>M3E Cursor Orange (Reduced Motion)</string>
-	<key>ThemeVersion</key><real>1</real>
+	<key>ThemeVersion</key><real>1.2</real>
 	<key>UUID</key><string>EDA2E3FC-4EAD-5EF4-B77F-519A45BFEBA4</string>
 </dict>
 </plist>

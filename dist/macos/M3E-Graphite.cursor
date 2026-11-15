@@ -233353,7 +233353,7 @@
 	<key>HiDPI</key><true/>
 	<key>Identifier</key><string>M3ECursorGraphite</string>
 	<key>ThemeName</key><string>M3E Cursor Graphite</string>
-	<key>ThemeVersion</key><real>1</real>
+	<key>ThemeVersion</key><real>1.2</real>
 	<key>UUID</key><string>E02E3720-FC34-5D8A-B0B6-700B4F122170</string>
 </dict>
 </plist>
