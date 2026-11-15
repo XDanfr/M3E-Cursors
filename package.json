@@ -1,14 +1,16 @@
 {
-  "name": "m3e-cursor-purple",
+  "name": "m3e-cursors",
   "version": "1.0.0",
-  "description": "Material 3 Expressive cursor theme for macOS, packaged for MaCursor",
+  "description": "Material 3 Expressive cursor themes for macOS (MaCursor), Windows and Linux (KDE, GNOME)",
   "scripts": {
     "palettes": "node tools/palettes.mjs",
     "render": "node tools/render.mjs",
     "package": "node tools/package.mjs",
+    "windows": "node tools/windows.mjs",
+    "linux": "node tools/linux.mjs",
     "validate": "node tools/validate.mjs",
     "previews": "node tools/previews.mjs",
-    "build": "npm run render && npm run package && npm run validate && npm run previews"
+    "build": "npm run render && npm run package && npm run windows && npm run linux && npm run validate && npm run previews"
   },
   "license": "MIT",
   "type": "module",
