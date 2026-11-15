@@ -1,5 +1,7 @@
 // Builds Xcursor themes for KDE Plasma, GNOME and other X11 / Wayland desktops:
 // dist/linux/M3E-<Colour>/ (index.theme + cursors/) and dist/linux/M3E-<Colour>.tar.gz.
+// If tools/hyprcursor.mjs has run, its manifest.hl and hyprcursors/ go into the same folder, so
+// the archive also works as a Hyprcursor theme on Hyprland.
 //   node tools/linux.mjs [variant ...]
 //
 // Xcursor file (all little-endian): "Xcur", header size 16, version 0x10000, TOC count, then one
@@ -8,7 +10,7 @@
 // premultiplied ARGB pixels, top row first. Frames of an animation are consecutive images of the
 // same nominal size.
 import { PNG } from 'pngjs';
-import { readFileSync, writeFileSync, mkdirSync, rmSync, symlinkSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, rmSync, symlinkSync, cpSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -65,6 +67,8 @@ function build(v) {
     `Comment=Material 3 Expressive cursors, ${v.name.toLowerCase()} palette`,
     'Inherits=breeze_cursors,Adwaita', '',
   ].join('\n'));
+  const hypr = join(ROOT, 'dist/hyprcursor', name);
+  if (existsSync(hypr)) cpSync(hypr, out, { recursive: true });
   execFileSync('tar', ['-czf', `${name}.tar.gz`, name], { cwd: join(ROOT, 'dist/linux'), env: { ...process.env, COPYFILE_DISABLE: '1' } });
   console.log(`wrote dist/linux/${name}/ and ${name}.tar.gz`);
 }
