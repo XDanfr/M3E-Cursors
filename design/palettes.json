@@ -1,0 +1,12 @@
+[
+  { "id": "purple", "name": "Purple", "seed": "#6750A4", "style": "baseline" },
+  { "id": "blue", "name": "Blue", "seed": "#0B57D0" },
+  { "id": "teal", "name": "Teal", "seed": "#006A6A" },
+  { "id": "green", "name": "Green", "seed": "#386A20" },
+  { "id": "orange", "name": "Orange", "seed": "#8B5000" },
+  { "id": "red", "name": "Red", "seed": "#B3261E" },
+  { "id": "pink", "name": "Pink", "seed": "#984061" },
+  { "id": "graphite", "name": "Graphite", "seed": "#6750A4", "chroma": 6 },
+  { "id": "lightblue", "name": "Light Blue", "seed": "#0288D1", "style": "light" },
+  { "id": "paleblue", "name": "Pale Blue", "seed": "#0288D1", "style": "pale" }
+]
