@@ -23,6 +23,28 @@ const G = 1.8; // glyph stroke weight
 
 const arrowWith = (badge) => svg(layer([arrowPart]) + badge);
 
+// ---------- Upload / copy morph --------------------------------------------------------
+const SP = T.motion.springSpatial, SE = T.motion.springEffects;
+function uploadFrame(i) {
+  const ms = i * T.motion.uploadLoop.frameMs;
+  // hold plus 0-600 ms, spring to upload arrow, hold, spring back from 1800 ms
+  let spatial, effect;
+  if (ms < 700) { spatial = 0; effect = 0; }
+  else if (ms < 1900) { spatial = spring((ms - 600) / 1000, SP); effect = spring((ms - 600) / 1000, SE); }
+  else { spatial = 1 - spring((ms - 1800) / 1000, SP); effect = 1 - spring((ms - 1800) / 1000, SE); }
+  const s = Math.min(1, Math.max(0, effect));
+  const scale = 1 + 0.1 * spatial;
+  const k = (p) => [p[0] * scale, p[1] * scale];
+  const stemTop = lerp([0, -3.6], [0, -4.0], s), stemBot = lerp([0, 3.6], [0, 3.9], s);
+  const apex = lerp([0, 0], [0, -4.0], s);
+  const l = lerp([-3.6, 0], [-3.4, -0.6], s), r = lerp([3.6, 0], [3.4, -0.6], s);
+  const g = [
+    { d: line(...at([k(stemTop), k(stemBot)])), w: G },
+    { d: line(...at([k(l), k(apex), k(r)])), w: G },
+  ];
+  return arrowWith(fab(scale) + glyph(g, C.onPrimaryContainer));
+}
+
 // ---------- I-beam ---------------------------------------------------------------------
 // Straight stem with soft, slightly cupped serifs.
 const ibeamParts = [
@@ -86,6 +108,12 @@ export const cursors = [
     name: 'text', label: 'Text I-beam', group: 'Everyday',
     roles: ['IBeam', 'IBeamS', 'IBeamXOR'].map(ID), hotspot: [16, 16],
     svg: () => svg(layer(ibeamParts)),
+  },
+  {
+    name: 'upload', label: 'Upload / copy drop', group: 'Expressive',
+    roles: ['Copy', 'cursor.5'].map(ID), hotspot: ARROW_HOT,
+    frames: 24, frameMs: T.motion.uploadLoop.frameMs,
+    svg: uploadFrame,
   },
 ];
 
