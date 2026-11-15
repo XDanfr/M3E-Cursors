@@ -1,0 +1,9 @@
+# Dependencies
+node_modules/
+
+# Generated frames and render logs (rebuild with `npm run render`)
+build/
+*.log
+
+# macOS
+.DS_Store
