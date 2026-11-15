@@ -8,7 +8,7 @@
 //           MaCursor's own writer stops at 24 frames. Longer strips import and play in its
 //           preview, and its engine resamples them to 24 when it applies the theme.
 //
-//   node tools/package.mjs [variant ...]   -> dist/M3E-<Variant>.cursor + dist/M3E-<Variant>-ReducedMotion.cursor
+//   node tools/package.mjs [variant ...]   -> dist/macos/M3E-<Variant>.cursor + M3E-<Variant>-ReducedMotion.cursor
 import { PNG } from 'pngjs';
 import { pixelSizesFor, VARIANTS } from '../design/geometry.mjs';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
@@ -53,6 +53,7 @@ function build({ variant, themeName, file: fileName, reducedMotion }) {
   const identifier = sanitize(themeName);
   const entries = [];
   for (const c of manifest) {
+    if (!c.roles.length) continue; // Windows / Linux only
     const frames = reducedMotion ? 1 : c.frames;
     const duration = frames > 1 ? c.frameDuration : 1;
     const reps = pixelSizesFor(c.frames).map((px) => strip(variant, c.name, px, frames));
@@ -88,8 +89,8 @@ ${reps.map((r) => `\t\t\t\t<data>\n${b64(r)}\t\t\t\t</data>`).join('\n')}
 </dict>
 </plist>
 `;
-  mkdirSync(join(ROOT, 'dist'), { recursive: true });
-  const file = join(ROOT, 'dist', `${fileName}.cursor`);
+  mkdirSync(join(ROOT, 'dist/macos'), { recursive: true });
+  const file = join(ROOT, 'dist/macos', `${fileName}.cursor`);
   writeFileSync(file, xml);
   console.log(`wrote ${file.slice(ROOT.length + 1)}  (${entries.length} roles, ${(xml.length / 1e6).toFixed(2)} MB)`);
 }
