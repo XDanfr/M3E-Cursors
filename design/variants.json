@@ -2,6 +2,7 @@
   {
     "id": "purple",
     "name": "Purple",
+    "slug": "Purple",
     "seed": "#6750A4",
     "colors": {
       "primary": "#6750A4",
@@ -14,6 +15,7 @@
   {
     "id": "blue",
     "name": "Blue",
+    "slug": "Blue",
     "seed": "#0B57D0",
     "colors": {
       "primary": "#0856CF",
@@ -26,6 +28,7 @@
   {
     "id": "teal",
     "name": "Teal",
+    "slug": "Teal",
     "seed": "#006A6A",
     "colors": {
       "primary": "#006A6A",
@@ -38,6 +41,7 @@
   {
     "id": "green",
     "name": "Green",
+    "slug": "Green",
     "seed": "#386A20",
     "colors": {
       "primary": "#386A20",
@@ -50,6 +54,7 @@
   {
     "id": "orange",
     "name": "Orange",
+    "slug": "Orange",
     "seed": "#8B5000",
     "colors": {
       "primary": "#8B5000",
@@ -62,6 +67,7 @@
   {
     "id": "red",
     "name": "Red",
+    "slug": "Red",
     "seed": "#B3261E",
     "colors": {
       "primary": "#B4271F",
@@ -74,6 +80,7 @@
   {
     "id": "pink",
     "name": "Pink",
+    "slug": "Pink",
     "seed": "#984061",
     "colors": {
       "primary": "#984061",
@@ -86,6 +93,7 @@
   {
     "id": "graphite",
     "name": "Graphite",
+    "slug": "Graphite",
     "seed": "hue 285, chroma 6",
     "colors": {
       "primary": "#605D64",
@@ -93,6 +101,36 @@
       "primaryContainer": "#E6E0E9",
       "onPrimaryContainer": "#1D1B20",
       "hairline": "#1D1B20"
+    }
+  },
+  {
+    "id": "lightblue",
+    "name": "Light Blue",
+    "slug": "LightBlue",
+    "seed": "#0288D1",
+    "scheme": "light",
+    "colors": {
+      "primary": "#96CCFF",
+      "primary30": "#2B97E1",
+      "primaryContainer": "#004A75",
+      "onPrimaryContainer": "#CEE5FF",
+      "rim": "#001D32",
+      "hairline": "#FFFFFF"
+    }
+  },
+  {
+    "id": "paleblue",
+    "name": "Pale Blue",
+    "slug": "PaleBlue",
+    "seed": "#0288D1",
+    "scheme": "light",
+    "colors": {
+      "primary": "#CEE5FF",
+      "primary30": "#51B2FE",
+      "primaryContainer": "#00639A",
+      "onPrimaryContainer": "#E8F2FF",
+      "rim": "#003353",
+      "hairline": "#FFFFFF"
     }
   }
 ]
