@@ -9,6 +9,7 @@
 //           preview, and its engine resamples them to 24 when it applies the theme.
 //
 //   node tools/package.mjs [variant ...]   -> dist/macos/M3E-<Variant>.cursor + M3E-<Variant>-ReducedMotion.cursor
+//   node tools/package.mjs --gallery [variant ...]   -> dist/gallery/M3ECursor<Variant>.cursor (MaCursor gallery edition)
 import { PNG } from 'pngjs';
 import { pixelSizesFor, VARIANTS } from '../design/geometry.mjs';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
@@ -23,13 +24,13 @@ const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json')));
 const framePath = (variant, name, px, i) =>
   join(ROOT, 'build/frames', variant, name, String(px), `${String(i).padStart(2, '0')}.png`);
 
-function strip(variant, name, px, frames) {
-  const out = new PNG({ width: px, height: px * frames });
-  for (let i = 0; i < frames; i++) {
+function strip(variant, name, px, picks) { // picks: the frame indices to stack, in order
+  const out = new PNG({ width: px, height: px * picks.length });
+  picks.forEach((i, k) => {
     const f = PNG.sync.read(readFileSync(framePath(variant, name, px, i)));
     if (f.width !== px || f.height !== px) throw new Error(`${name} ${px}px frame ${i} is ${f.width}x${f.height}`);
-    f.data.copy(out.data, i * px * px * 4);
-  }
+    f.data.copy(out.data, k * px * px * 4);
+  });
   return PNG.sync.write(out, { colorType: 6 });
 }
 
@@ -49,14 +50,24 @@ const b64 = (buf) => buf.toString('base64').replace(/.{1,68}/g, '\t\t\t\t$&\n');
 // CursorThemeWriter.sanitizeIdentifier does) and renames anything else on import.
 const sanitize = (name) => name.trim().replace(/[ /:]/g, '');
 
-function build({ variant, themeName, file: fileName, reducedMotion }) {
+// Gallery edition (for MaCursor's built-in theme gallery): the 280-frame busy cursors are thinned
+// to 30 fps and kept at 32 / 64 px, like the MD3E Cursors gallery theme. That brings a theme from
+// ~16 MB to ~5 MB. MaCursor's engine resamples anything over 24 frames when it applies a theme,
+// so system-wide playback is the same; only the in-app preview drops from 60 to 30 fps.
+const GALLERY_FPS = 30, GALLERY_SIZES = [32, 64];
+
+function build({ variant, themeName, file: fileName, reducedMotion, gallery = false, dir = 'dist/macos', creator = 'M3E Cursor project' }) {
   const identifier = sanitize(themeName);
   const entries = [];
   for (const c of manifest) {
     if (!c.roles.length) continue; // Windows / Linux only
-    const frames = reducedMotion ? 1 : c.frames;
-    const duration = frames > 1 ? c.frameDuration : 1;
-    const reps = pixelSizesFor(c.frames).map((px) => strip(variant, c.name, px, frames));
+    const long = c.frames > 24 && gallery;
+    const step = long ? Math.max(1, Math.round(1000 / GALLERY_FPS / (c.frameDuration * 1000))) : 1;
+    const picks = reducedMotion ? [0] : [...Array(Math.ceil(c.frames / step)).keys()].map((k) => k * step);
+    const frames = picks.length;
+    const duration = frames > 1 ? (c.frames * c.frameDuration) / frames : 1;
+    const sizes = long ? GALLERY_SIZES : pixelSizesFor(c.frames);
+    const reps = sizes.map((px) => strip(variant, c.name, px, picks));
     for (const role of c.roles) entries.push([role, `
 \t\t<key>${role}</key>
 \t\t<dict>
@@ -77,7 +88,7 @@ ${reps.map((r) => `\t\t\t\t<data>\n${b64(r)}\t\t\t\t</data>`).join('\n')}
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-\t<key>Creator</key><string>M3E Cursor project</string>
+\t<key>Creator</key><string>${esc(creator)}</string>
 \t<key>Cursors</key>
 \t<dict>${entries.map(([, e]) => e).join('')}
 \t</dict>
@@ -89,14 +100,20 @@ ${reps.map((r) => `\t\t\t\t<data>\n${b64(r)}\t\t\t\t</data>`).join('\n')}
 </dict>
 </plist>
 `;
-  mkdirSync(join(ROOT, 'dist/macos'), { recursive: true });
-  const file = join(ROOT, 'dist/macos', `${fileName}.cursor`);
+  mkdirSync(join(ROOT, dir), { recursive: true });
+  const file = join(ROOT, dir, `${fileName}.cursor`);
   writeFileSync(file, xml);
   console.log(`wrote ${file.slice(ROOT.length + 1)}  (${entries.length} roles, ${(xml.length / 1e6).toFixed(2)} MB)`);
 }
 
-const only = process.argv.slice(2);
+const gallery = process.argv.includes('--gallery');
+const only = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 for (const v of VARIANTS.filter((v) => !only.length || only.includes(v.id))) {
+  if (gallery) { // dist/gallery/M3ECursor<Colour>.cursor, named like the files in MaCursor's themes/
+    const themeName = `M3E Cursor ${v.name}`;
+    build({ variant: v.id, themeName, file: sanitize(themeName), reducedMotion: false, gallery: true, dir: 'dist/gallery', creator: 'XDanfr' });
+    continue;
+  }
   build({ variant: v.id, themeName: `M3E Cursor ${v.name}`, file: `M3E-${v.slug}`, reducedMotion: false });
   build({ variant: v.id, themeName: `M3E Cursor ${v.name} (Reduced Motion)`, file: `M3E-${v.slug}-ReducedMotion`, reducedMotion: true });
 }
