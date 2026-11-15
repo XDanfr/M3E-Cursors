@@ -94,7 +94,7 @@
     "id": "graphite",
     "name": "Graphite",
     "slug": "Graphite",
-    "seed": "hue 285, chroma 6",
+    "seed": "hue 299, chroma 6",
     "colors": {
       "primary": "#605D64",
       "primary30": "#48464C",
