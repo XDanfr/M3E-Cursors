@@ -3,12 +3,14 @@
 // Checks: frame counts, dimensions, alpha channel and transparent margins, hotspot placement,
 // role coverage against MaCursor's slot list, and the same plist rules MaCursor's
 // CursorThemeWriter.validateThemePlist applies to its own output. Windows .cur / .ani files and
-// Linux Xcursor files are parsed back: structure, sizes, hotspots, frame counts and loop length.
+// Linux Xcursor files and Hyprcursor .hlc archives are parsed back: structure, sizes, hotspots,
+// aliases, frame counts and loop length.
 import { PNG } from 'pngjs';
 import { pixelSizesFor, windowsSizesFor, linuxSizes, VARIANTS } from '../design/geometry.mjs';
 import { WINDOWS, LINUX } from '../design/platforms.mjs';
 import { readFileSync, existsSync, lstatSync, readlinkSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import { inflateRawSync } from 'node:zlib';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -168,6 +170,57 @@ for (const v of VARIANTS) {
   }
 }
 
+// ---- Hyprcursor (rules from libhyprcursor: meta.cpp, hyprcursor.cpp) ----
+function unzipAll(buf) {
+  let e = buf.length - 22; while (e > 0 && buf.readUInt32LE(e) !== 0x06054b50) e--;
+  const n = buf.readUInt16LE(e + 10), files = {};
+  for (let k = 0, p = buf.readUInt32LE(e + 16); k < n; k++) {
+    const method = buf.readUInt16LE(p + 10), size = buf.readUInt32LE(p + 20), nl = buf.readUInt16LE(p + 28);
+    const name = buf.toString('utf8', p + 46, p + 46 + nl), off = buf.readUInt32LE(p + 42);
+    const start = off + 30 + buf.readUInt16LE(off + 26) + buf.readUInt16LE(off + 28), raw = buf.subarray(start, start + size);
+    files[name] = method === 8 ? inflateRawSync(raw) : raw;
+    p += 46 + nl + buf.readUInt16LE(p + 30) + buf.readUInt16LE(p + 32);
+  }
+  return files;
+}
+let hyprShapes = 0;
+for (const v of VARIANTS) {
+  const dir = join(ROOT, 'dist/linux', `M3E-${v.name}`);
+  if (!existsSync(join(dir, 'manifest.hl'))) { err(`linux/${v.id}: no Hyprcursor manifest.hl`); continue; }
+  const man = readFileSync(join(dir, 'manifest.hl'), 'utf8');
+  if (!/^cursors_directory = hyprcursors$/m.test(man) || !man.includes(`name = M3E ${v.name}`)) err(`hyprcursor/${v.id}: manifest.hl incomplete`);
+  for (const [name, names] of Object.entries(LINUX)) {
+    const c = byName[name], where = `hyprcursor/${v.id}/${names[0]}.hlc`, file = join(dir, 'hyprcursors', `${names[0]}.hlc`);
+    if (!existsSync(file)) { err(`${where}: missing`); continue; }
+    const z = unzipAll(readFileSync(file));
+    if (!z['meta.hl']) { err(`${where}: no meta.hl`); continue; }
+    const kv = (k) => [...z['meta.hl'].toString().matchAll(new RegExp(`^${k} = (.*)$`, 'gm'))].map((m) => m[1]);
+    const [hx, hy] = ['hotspot_x', 'hotspot_y'].map((k) => +kv(k)[0]);
+    if (!(hx >= 0 && hx < 1 && hy >= 0 && hy < 1)) err(`${where}: hotspot ${hx},${hy} not a 0-1 fraction`);
+    const nominal = +kv('nominal_size')[0];
+    if (!(nominal >= 0.1 && nominal <= 2)) err(`${where}: nominal_size ${nominal} outside 0.1-2`);
+    if (kv('define_override').join() !== names.join()) err(`${where}: overrides differ from the Linux name map`);
+    const sizes = kv('define_size').map((d) => d.split(',').map((x) => x.trim()));
+    const kinds = new Set(sizes.map(([, f]) => f.split('.').pop()));
+    if (kinds.size !== 1) err(`${where}: mixes ${[...kinds]}`);
+    const per = {};
+    for (const [size, f, delay] of sizes) {
+      if (!z[f]) { err(`${where}: ${f} listed but not packed`); continue; }
+      if (f.endsWith('.png')) {
+        const png = PNG.sync.read(z[f]);
+        if (png.width !== +size || png.height !== +size) err(`${where}: ${f} is ${png.width}x${png.height}, declared ${size}`);
+      } else if (!z[f].toString().startsWith('<svg')) err(`${where}: ${f} is not an SVG`);
+      if (c.frames > 1 && !(+delay > 0)) err(`${where}: ${f} has no delay`);
+      (per[size] ??= []).push(+delay || 0);
+    }
+    for (const [size, d] of Object.entries(per)) {
+      const total = d.reduce((a, b) => a + b, 0), want = c.frames > 1 ? Math.round(c.frames * c.frameDuration * 1000) : 0;
+      if (total !== want) err(`${where}: size ${size} loop is ${total} ms, expected ${want}`);
+    }
+    hyprShapes++;
+  }
+}
+console.log(`hyprcursor: ${hyprShapes} shapes checked`);
 console.log(`windows: ${VARIANTS.length} schemes x ${WINDOWS.length} roles; linux: ${VARIANTS.length} themes x ${Object.keys(LINUX).length} cursors, ${Object.values(LINUX).flat().length} names`);
 console.log(`${manifest.length} cursors x ${VARIANTS.length} variants, ${seen.size} roles covered`);
 for (const w of warnings) console.log('warning:', w);
