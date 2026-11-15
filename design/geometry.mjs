@@ -97,3 +97,12 @@ export { lerp };
 // 320 x 89 600 px (~115 MB decoded), and MaCursor needs every slot only to be larger than the one below.
 export const pixelSizesFor = (frames) => Object.values(T.representations.pixelSizes)
   .filter((px) => frames <= 24 || px <= T.representations.longAnimationMaxPx);
+
+// Windows: every .cur carries all sizes; animated cursors stop at animatedMaxPx to keep .ani files small.
+export const windowsSizesFor = (frames) => T.targets.windows.pixelSizes
+  .filter((px) => frames === 1 || px <= T.targets.windows.animatedMaxPx);
+// Linux: [nominal size, image px] pairs for Xcursor.
+export const linuxSizes = Object.entries(T.targets.linux.nominalToPx).map(([n, px]) => [+n, px]);
+// Everything the renderer has to produce for one cursor.
+export const renderSizesFor = (frames) => [...new Set([...pixelSizesFor(frames), ...windowsSizesFor(frames),
+  ...linuxSizes.map(([, px]) => px)])].sort((a, b) => a - b);
