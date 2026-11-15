@@ -1,0 +1,93 @@
+// Shape helpers shared by every cursor. All coordinates are points on the 32 x 32 canvas.
+import { readFileSync } from 'node:fs';
+
+export const T = JSON.parse(readFileSync(new URL('./tokens.json', import.meta.url)));
+export const C = Object.fromEntries(Object.entries(T.color).map(([k, v]) => [k, v.value]));
+const RIM = T.edge.rimWidth.value;
+const HAIR = T.edge.hairlineWidth.value;
+
+const f = (n) => +n.toFixed(3);
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
+const add = (a, b) => [a[0] + b[0], a[1] + b[1]];
+const mul = (a, k) => [a[0] * k, a[1] * k];
+const len = (a) => Math.hypot(a[0], a[1]);
+const norm = (a) => mul(a, 1 / len(a));
+const lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+export const P = (p) => `${f(p[0])},${f(p[1])}`;
+
+// Closed polygon with a corner radius per vertex. Corners are cubic curves whose
+// handles sit 60 % of the way to the vertex: softer than a circular arc, close to a squircle.
+const K = 0.6;
+function corners(pts, radii) {
+  const n = pts.length;
+  return pts.map((p, i) => {
+    const a = pts[(i + n - 1) % n], b = pts[(i + 1) % n];
+    const r = Array.isArray(radii) ? radii[i] : radii;
+    const u1 = norm(sub(a, p)), u2 = norm(sub(b, p));
+    const cos = Math.max(-1, Math.min(1, u1[0] * u2[0] + u1[1] * u2[1]));
+    const theta = Math.acos(cos);
+    let d = r / Math.tan(theta / 2);
+    d = Math.min(d, len(sub(a, p)) * 0.5, len(sub(b, p)) * 0.5);
+    const p1 = add(p, mul(u1, d)), p2 = add(p, mul(u2, d));
+    return { p, p1, p2, c1: lerp(p1, p, K), c2: lerp(p2, p, K) };
+  });
+}
+export function roundedPoly(pts, radii) {
+  const cs = corners(pts, radii);
+  let d = `M${P(cs[0].p2)}`;
+  for (let i = 1; i <= cs.length; i++) {
+    const c = cs[i % cs.length];
+    d += `L${P(c.p1)}C${P(c.c1)} ${P(c.c2)} ${P(c.p2)}`;
+  }
+  return d + 'Z';
+}
+// Visual apex of a rounded corner (the point the eye reads as the tip).
+export function cornerApex(pts, radii, i) {
+  const c = corners(pts, radii)[i];
+  return [0.125 * c.p1[0] + 0.375 * c.c1[0] + 0.375 * c.c2[0] + 0.125 * c.p2[0],
+          0.125 * c.p1[1] + 0.375 * c.c1[1] + 0.375 * c.c2[1] + 0.125 * c.p2[1]];
+}
+
+export const rrect = (x, y, w, h, r) => roundedPoly([[x, y], [x + w, y], [x + w, y + h], [x, y + h]], r);
+export const circle = (cx, cy, r) =>
+  `M${f(cx - r)},${f(cy)}a${f(r)},${f(r)} 0 1,0 ${f(2 * r)},0a${f(r)},${f(r)} 0 1,0 ${f(-2 * r)},0Z`;
+export const line = (...pts) => 'M' + pts.map(P).join('L');
+
+// A part is { d } (filled) or { d, w } (stroked centre-line with round caps and joins).
+// layer() draws a set of parts as one silhouette: hairline, then white rim, then fill.
+// Because every part is outlined before any fill is drawn, overlapping parts merge
+// into a single shape without internal outlines.
+function draw(parts, color, extra, opacity) {
+  const els = parts.map(({ d, w }) => w
+    ? `<path d="${d}" fill="none" stroke="${color}" stroke-width="${f(w + 2 * extra)}"/>`
+    : extra > 0
+      ? `<path d="${d}" fill="${color}" stroke="${color}" stroke-width="${f(2 * extra)}"/>`
+      : `<path d="${d}" fill="${color}"/>`);
+  return `<g${opacity < 1 ? ` opacity="${opacity}"` : ''}>${els.join('')}</g>`;
+}
+export function layer(parts, fill = C.primary) {
+  return draw(parts, C.hairline, RIM + HAIR, T.color.hairline.opacity)
+    + draw(parts, C.rim, RIM, 1)
+    + draw(parts, fill, 0, 1);
+}
+export const glyph = (parts, color) => draw(parts, color, 0, 1);
+
+export function svg(body, { transform } = {}) {
+  const inner = transform ? `<g transform="${transform}">${body}</g>` : body;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" ` +
+    `stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+}
+
+// Damped spring step response (M3E springs), returns position at time t (s) for 0 -> 1.
+export function spring(t, { dampingRatio: z, stiffness: k }) {
+  const w0 = Math.sqrt(k);
+  if (z >= 1) return 1 - (1 + w0 * t) * Math.exp(-w0 * t);
+  const wd = w0 * Math.sqrt(1 - z * z);
+  return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t));
+}
+export { lerp };
+
+// Pixel sizes shipped for a cursor. Long animations stop at 5x: a 280-frame 10x strip is
+// 320 x 89 600 px (~115 MB decoded), and MaCursor needs every slot only to be larger than the one below.
+export const pixelSizesFor = (frames) => Object.values(T.representations.pixelSizes)
+  .filter((px) => frames <= 24 || px <= T.representations.longAnimationMaxPx);
