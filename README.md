@@ -101,7 +101,9 @@ stored at 30 fps on Linux (140 frames, the same 4.666 s cycle) to keep the files
 
 ## Supported roles
 
-37 designs cover 47 MaCursor slots.
+41 designs in all. On macOS, 37 of them cover 47 MaCursor slots.
+
+### macOS
 
 | Design | macOS role(s) | Hotspot (pt) |
 |---|---|---|
@@ -146,21 +148,58 @@ stored at 30 fps on Linux (140 frames, the same 4.666 s cycle) to keep the files
 IBeam into them. This theme also writes them explicitly, so they match even if you turn off
 **Hide Tahoe cursors**.
 
+### Windows
+
+All 17 roles of a Windows cursor scheme are filled. Four designs exist only for Windows (and
+Linux): **Handwriting** (a pencil), **Alternate select** (an up arrow), **Location select** (a pin
+badge) and **Person select** (a person badge).
+
+| Scheme role | Design | File |
+|---|---|---|
+| Normal select | Default arrow | `pointer.cur` |
+| Help select | Help | `help.cur` |
+| Working in background | Busy in background (animated) | `working.ani` |
+| Busy | Busy (animated) | `busy.ani` |
+| Precision select | Crosshair | `precision.cur` |
+| Text select | Text I-beam | `text.cur` |
+| Handwriting | Pencil | `handwriting.cur` |
+| Unavailable | Unavailable | `unavailable.cur` |
+| Vertical / horizontal resize | Window resize ↕ ↔ | `vert.cur`, `horz.cur` |
+| Diagonal resize 1 / 2 | Window resize ⤡ ⤢ | `dgn1.cur`, `dgn2.cur` |
+| Move | Move | `move.cur` |
+| Alternate select | Up arrow | `alternate.cur` |
+| Link select | Link pointer | `link.cur` |
+| Location select | Pin badge | `pin.cur` |
+| Person select | Person badge | `person.cur` |
+
+### Linux
+
+Every theme has the freedesktop / CSS cursor names (`default`, `pointer`, `text`, `wait`,
+`progress`, `grab`, `grabbing`, `copy`, `alias`, `not-allowed`, `ew-resize`, `col-resize`,
+`zoom-in`, …). It also has the X11 core names (`left_ptr`, `xterm`, `watch`, `fleur`, …) and the
+hash names Qt and GTK ask for, as symlinks to the same files. Names the theme doesn't cover fall
+back to Breeze, then Adwaita. The full list is in [`design/platforms.mjs`](design/platforms.mjs).
+
 ## Known limitations
 
 - **Frame rate of the busy cursors.** Both busy cursors store the official indicator at 60 fps:
-  280 frames per 4.666 s cycle, the same layout as the MD3E Cursors gallery theme. MaCursor's
-  preview plays all of them. According to MaCursor's source, its engine samples 24 frames when it
-  applies a theme (a CoreGraphics cursor limit), so system-wide playback may be coarser. The cycle
-  length and shape sequence stay official either way.
-- **No transitions between cursors.** macOS swaps cursor images instantly, and animated cursors
-  always loop. So the grab → grabbing change is a static pair drawn on the same palm grid. The
+  280 frames per 4.666 s cycle, the same layout as the MD3E Cursors gallery theme. On macOS,
+  MaCursor's preview plays all of them, but according to MaCursor's source its engine samples 24
+  frames when it applies a theme (a CoreGraphics cursor limit), so system-wide playback may be
+  coarser. Windows plays all 280 frames (1 jiffy each). Linux plays 140 frames at 30 fps. The
+  cycle length and shape sequence stay official everywhere.
+- **Windows and Linux builds aren't tested on those systems yet.** The validator parses every
+  `.cur`, `.ani` and Xcursor file back and checks its structure, sizes, hotspots and loop length.
+  It can't check how a given Windows version or desktop shows them. The `.cur` and `.ani` images
+  are PNG-compressed, which Windows supports from Vista on.
+- **No transitions between cursors.** Every platform swaps cursor images instantly, and animated
+  cursors always loop. So the grab → grabbing change is a static pair drawn on the same palm grid. The
   upload cursor's "accepted ✓" stage isn't included either, because macOS has no "drop accepted"
-  cursor role.
+  cursor role (on any of the three platforms).
 - **Apps control which cursor appears.** A role only shows when the app asks for it. Many web
   pages and Electron apps draw their own cursors or use only a few roles. The upload animation
   appears only when an app shows the Copy drag cursor.
-- **Private APIs.** MaCursor applies themes through private CoreGraphics APIs. A macOS update can
+- **Private APIs (macOS).** MaCursor applies themes through private CoreGraphics APIs. A macOS update can
   change or break that. Some apps reset the cursor; see MaCursor's
   [troubleshooting guide](https://github.com/writronic/MaCursor/blob/main/docs/troubleshooting.md).
 - **1× displays.** At 32 px the art is anti-aliased from vector outlines, not hand-hinted. It
@@ -172,9 +211,12 @@ IBeam into them. This theme also writes them explicitly, so they match even if y
 design/      tokens.json, variants.json (colour variants), geometry.mjs (shape helpers),
              cursors.mjs (every cursor), animation-spec.md
 cursors/     editable SVG export of each cursor in purple (frame SVGs for the upload animation)
-tools/       render.mjs, package.mjs, validate.mjs, previews.mjs, sheet.mjs
+design/      platforms.mjs (Windows and Linux role maps)
+tools/       render.mjs, package.mjs (macOS), windows.mjs, linux.mjs, validate.mjs,
+             previews.mjs, sheet.mjs, palettes.mjs
 previews/    gallery (SVG + PNG, light and dark), variants overview and animation GIFs
-dist/        M3E-<Colour>.cursor and M3E-<Colour>-ReducedMotion.cursor for each variant
+dist/macos/  M3E-<Colour>.cursor and M3E-<Colour>-ReducedMotion.cursor for each colour
+dist/windows/ and dist/linux/  built locally and published as release assets (not in git)
 build/       generated frames (not part of the distribution)
 ```
 
@@ -189,14 +231,16 @@ used by the validator, to read the plist.
 
 ```bash
 npm install
-npm run build      # render → package → validate → previews, for every variant
+npm run build      # render → macOS, Windows, Linux → validate → previews, for every colour
 ```
 
 | Script | What it does |
 |---|---|
-| `npm run render` | Exports the SVGs and renders every cursor in every variant at 32/64/160/320 px (long animations stop at 160 px). Vector cursors are drawn at each device scale, so nothing is a bitmap upscale. Loading cursors are frames of the live `<m3e-loading-indicator>`, paused and seeked with the Web Animations API. |
+| `npm run render` | Exports the SVGs and renders every cursor in every colour at every size the three platforms use (`targets` in `design/tokens.json`). Vector cursors are drawn at each device scale, so nothing is a bitmap upscale. Loading cursors are frames of the live `<m3e-loading-indicator>`, paused and seeked with the Web Animations API. |
 | `npm run package` | Writes a `.cursor` theme and a reduced-motion theme per variant, in MaCursor's native plist format, the same format as MaCursor's own `CursorThemeWriter.swift`. |
-| `npm run validate` | Checks frame counts and sizes, alpha and clipping, hotspot placement, role coverage, and the plist rules MaCursor applies to its own themes. |
+| `npm run windows` | Writes `dist/windows/M3E-<Colour>/`: `.cur` / `.ani` files and an `install.inf` that registers the scheme. |
+| `npm run linux` | Writes `dist/linux/M3E-<Colour>/` Xcursor themes with all alias symlinks, and a `.tar.gz` of each. |
+| `npm run validate` | Parses the Windows and Linux files back, and checks frame counts and sizes, alpha and clipping, hotspot placement, role coverage, and the plist rules MaCursor applies to its own themes. |
 | `npm run palettes` | Regenerates `design/variants.json` from the seed colours in `tools/palettes.mjs`. To add a variant, add a seed there. |
 | `M3E_VARIANT=blue npm run render` | Renders a single variant. `package` takes variant ids as arguments: `node tools/package.mjs blue`. |
 | `npm run previews` | Writes the gallery and animation GIFs. |
