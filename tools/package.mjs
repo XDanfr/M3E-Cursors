@@ -56,7 +56,7 @@ const sanitize = (name) => name.trim().replace(/[ /:]/g, '');
 // so system-wide playback is the same; only the in-app preview drops from 60 to 30 fps.
 const GALLERY_FPS = 30, GALLERY_SIZES = [32, 64];
 
-function build({ variant, themeName, file: fileName, reducedMotion, gallery = false, dir = 'dist/macos', creator = 'M3E Cursor project' }) {
+function build({ variant, themeName, file: fileName, reducedMotion, gallery = false, dir = 'dist/macos', creator = pkg.author }) {
   const identifier = sanitize(themeName);
   const entries = [];
   for (const c of manifest) {
@@ -111,7 +111,7 @@ const only = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 for (const v of VARIANTS.filter((v) => !only.length || only.includes(v.id))) {
   if (gallery) { // dist/gallery/M3ECursor<Colour>.cursor, named like the files in MaCursor's themes/
     const themeName = `M3E Cursor ${v.name}`;
-    build({ variant: v.id, themeName, file: sanitize(themeName), reducedMotion: false, gallery: true, dir: 'dist/gallery', creator: 'XDanfr' });
+    build({ variant: v.id, themeName, file: sanitize(themeName), reducedMotion: false, gallery: true, dir: 'dist/gallery' });
     continue;
   }
   build({ variant: v.id, themeName: `M3E Cursor ${v.name}`, file: `M3E-${v.slug}`, reducedMotion: false });

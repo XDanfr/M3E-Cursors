@@ -12,6 +12,7 @@ import { VARIANTS } from '../design/geometry.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(readFileSync(join(ROOT, 'build/manifest.json')));
+const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json')));
 const NAMES = {
   'coregraphics.Arrow': 'Arrow', 'coregraphics.IBeam': 'IBeam', 'coregraphics.IBeamXOR': 'IBeamXOR',
   'coregraphics.Alias': 'Alias', 'coregraphics.Copy': 'Copy', 'coregraphics.Move': 'Move',
@@ -49,7 +50,7 @@ const page = (v) => `<!doctype html><html><head><style>
   .card img{width:68px;height:68px;margin-top:3px}
   .card span{margin-top:auto;margin-bottom:9px;font-size:10.4px;color:#1d1d1f;letter-spacing:.1px}
 </style></head><body>
-<header><h1>M3E Cursor ${v.name}</h1><div class="by">by XDanfr • v1.0</div><div class="count">${slots.length} cursors</div></header>
+<header><h1>M3E Cursor ${v.name}</h1><div class="by">by ${pkg.author} • v${parseFloat(pkg.version).toFixed(1)}</div><div class="count">${slots.length} cursors</div></header>
 <main>${slots.slice(0, 39).map((s) => `<div class="card"><img src="${img(v.id, s.cursor)}"><span>${short(s.label)}</span></div>`).join('')}</main>
 </body></html>`;
 

@@ -24,6 +24,7 @@ import { cursors } from '../design/cursors.mjs';
 import { LINUX } from '../design/platforms.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json')));
 if (!process.env.M3E_VARIANT) {
   for (const v of VARIANTS) {
     const r = spawnSync(process.execPath, [fileURLToPath(import.meta.url)], { stdio: 'inherit', env: { ...process.env, M3E_VARIANT: v.id } });
@@ -74,7 +75,7 @@ writeFileSync(join(out, 'manifest.hl'), [
   `name = M3E ${VARIANT.name}`,
   `description = Material 3 Expressive cursors, ${VARIANT.name.toLowerCase()} palette`,
   'version = 1.0',
-  'author = XDanfr',
+  `author = ${pkg.author}`,
   'cursors_directory = hyprcursors', '',
 ].join('\n'));
 

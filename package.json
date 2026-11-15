@@ -2,6 +2,7 @@
   "name": "m3e-cursors",
   "version": "1.0.0",
   "description": "Material 3 Expressive cursor themes for macOS (MaCursor), Windows and Linux (KDE, GNOME)",
+  "author": "XDan",
   "scripts": {
     "palettes": "node tools/palettes.mjs",
     "new-colour": "node tools/new-colour.mjs",
