@@ -318,17 +318,14 @@ npm run build      # render → macOS, Windows, Linux → validate → previews,
 - **[MaCursor](https://github.com/writronic/MaCursor)** by writronic: the macOS cursor manager these
   themes are built for. Its theme writer and loader source defined the `.cursor` format used here.
 - **[MD3E Cursors](https://github.com/writronic/MaCursor/blob/main/themes/MD3ECursors.cursor)** by
-  [playagain96](https://github.com/playagain96): the Material 3 Expressive cursor theme in MaCursor's
-  gallery, and the inspiration for this project.
+  [playagain96](https://github.com/playagain96): an amazing implementation of Material 3 Expressive and some great inspiration for this project!
 - **[matraic/m3e](https://github.com/matraic/m3e)** (MIT): the busy cursor is its
   `m3e-loading-indicator` component, and the badge and centre shapes come from its `m3e-shape`
   component's Material Shape library.
 - **[material-color-utilities](https://github.com/material-foundation/material-color-utilities)**
-  by Google (Apache-2.0): the M3 tonal palettes behind every colour.
-- **[Material 3 Expressive](https://m3.material.io/)** by Google: the design language these cursors
-  follow.
+  by Google (Apache-2.0)
+- **[Material 3 Expressive](https://m3.material.io/)** by Google
 
 ## Licence
 
-Cursor artwork, tooling and documentation are MIT licensed; see `LICENSE`. MIT is compatible with
-GPL-3.0, so the themes can also ship in MaCursor's GPL-3.0 theme gallery.
+Cursor artwork, tooling and documentation are MIT licensed. See `LICENSE`.
